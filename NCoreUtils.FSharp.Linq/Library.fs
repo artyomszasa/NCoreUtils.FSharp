@@ -9,26 +9,28 @@ open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 open Microsoft.FSharp.Linq.RuntimeHelpers.LeafExpressionConverter
 open System
+open System.Diagnostics.CodeAnalysis
 open System.Collections.Immutable
 open System.Collections.Generic
 open System.Linq
 
-module Q =
+[<AbstractClass; Sealed>]
+[<SuppressMessage("NameConventions", "*")>]
+type Q private () =
 
   [<Literal>]
-  let private PublicInstanceBinding =
+  static let PublicInstanceBinding =
     BindingFlags.Instance
       ||| BindingFlags.Public
 
   [<Literal>]
-  let private AnyCtorBinding =
+  static let AnyCtorBinding =
     BindingFlags.NonPublic
       ||| BindingFlags.Public
       ||| BindingFlags.Instance
 
-
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-  let private (|FSharpFunc|_|) (e : Expression) =
+  static let (|FSharpFunc|_|) (e : Expression) =
     match e with
     | :? MethodCallExpression as me when me.Method.Name = "ToFSharpFunc" && me.Arguments.Count = 1 ->
       match me.Arguments.[0] with
@@ -37,7 +39,7 @@ module Q =
     | _ -> None
 
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-  let private (|LambdaFunc|_|) (le : LambdaExpression) =
+  static let (|LambdaFunc|_|) (le : LambdaExpression) =
     match le.Parameters with
     | args when args.Count = 1 -> Some (args.[0], le.Body)
     | _ -> None
@@ -45,7 +47,7 @@ module Q =
   /// <summary>
   /// Fixes new expression when creating F# types (only Tuples and Records supported at the moment)
   /// </summary>
-  let private fixNewExpression (e : NewExpression) : NewExpression =
+  static let fixNewExpression (e : NewExpression) : NewExpression =
     let ty = e.Type
     match ty with
     | TupleType memberTypes ->
@@ -75,12 +77,13 @@ module Q =
   /// <summary>
   /// Fixes new expression wrapped in lambda expression
   /// </summary>
-  let private fixLambdaExpression (l : 'a when 'a :> LambdaExpression) =
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  static let fixLambdaExpression (l : 'a when 'a :> LambdaExpression) =
     match l.Body with
     | :? NewExpression as e -> Expression.Lambda (fixNewExpression e, l.Parameters) :?> 'a
     | _ -> l
 
-  let private fixNewExpressions =
+  static let fixNewExpressions =
     let visitor =
       { new ExpressionVisitor () with
           override this.VisitNew node =
@@ -112,7 +115,7 @@ module Q =
       }
     visitor.Visit : Expression -> Expression
 
-  let rec private funcToLambda acc expression =
+  static let rec funcToLambda acc expression =
     match expression with
     | FSharpFunc (LambdaFunc (arg, body)) -> funcToLambda (arg :: acc) body
     | _ ->
@@ -120,12 +123,13 @@ module Q =
       Array.revInPlace args
       Expression.Lambda (expression, args)
 
-  let private fsharpFuncToLambda (node : Expression) =
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  static let fsharpFuncToLambda (node : Expression) =
     match node with
     | FSharpFunc (LambdaFunc (arg, body)) -> funcToLambda [arg] body
     | _ -> invalidOpf "Not an F# Function: %A" node
 
-  let private replaceSequenceMethods =
+  static let replaceSequenceMethods =
     let getMethodDefinition (expr : Expr) =
       match expr with
       | Microsoft.FSharp.Quotations.DerivedPatterns.Lambdas (_, Call (_, m, _)) -> m.GetGenericMethodDefinition ()
@@ -171,39 +175,45 @@ module Q =
       }
     visitor.Visit : Expression -> Expression
 
-  let private toLinqExprImpl (quotation : Expr) =
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  static let toLinqExprImpl (quotation : Expr) =
     QuotationToExpression quotation
     |> fixNewExpressions
     |> replaceSequenceMethods
     |> fsharpFuncToLambda
 
   [<CompiledName("ToLinqExpression1")>]
-  let toLinqExpr1 (quotation : Expr<'a -> 'b>) = toLinqExprImpl quotation :?> Expression<Func<'a, 'b>>
+  static member toLinqExpr1 (quotation : Expr<'a -> 'b>) = toLinqExprImpl quotation :?> Expression<Func<'a, 'b>>
 
   [<CompiledName("ToLinqExpression2")>]
-  let toLinqExpr2 (quotation : Expr<'a -> 'b -> 'c>) = toLinqExprImpl quotation :?> Expression<Func<'a, 'b, 'c>>
+  static member toLinqExpr2 (quotation : Expr<'a -> 'b -> 'c>) = toLinqExprImpl quotation :?> Expression<Func<'a, 'b, 'c>>
 
   [<CompiledName("Filter")>]
-  let filter ([<ReflectedDefinition>] predicate : Expr<'a -> bool>) =
-    let predicate' = toLinqExpr1 predicate
+  static member filter ([<ReflectedDefinition>] predicate : Expr<'a -> bool>) =
+    let predicate' = Q.toLinqExpr1 predicate
     fun (queryable : IQueryable<'a>) -> queryable.Where predicate'
 
   [<CompiledName("Map")>]
-  let map ([<ReflectedDefinition>] predicate : Expr<'a -> 'b>) =
-    let predicate' = toLinqExpr1 predicate
-    fun (query : IQueryable<'a>) -> query.Select predicate'
+  static member map ([<ReflectedDefinition>] selector : Expr<'a -> 'b>) =
+    let selector' = Q.toLinqExpr1 selector
+    fun (query : IQueryable<'a>) -> query.Select selector'
+
+  [<CompiledName("Collect")>]
+  static member collect ([<ReflectedDefinition>] selector : Expr<'a -> IEnumerable<'b>>) =
+    let selector' = Q.toLinqExpr1 selector
+    fun (query : IQueryable<'a>) -> query.SelectMany selector'
 
   [<CompiledName("AsyncCount")>]
-  let asyncCount (query : IQueryable<_>) = Async.Adapt query.CountAsync
+  static member asyncCount (query : IQueryable<_>) = Async.Adapt query.CountAsync
 
   [<CompiledName("AsyncToList")>]
-  let asyncToResizeArray (query : IQueryable<_>) = Async.Adapt query.ToListAsync
+  static member asyncToResizeArray (query : IQueryable<_>) = Async.Adapt query.ToListAsync
 
   [<CompiledName("AsyncToArray")>]
-  let asyncToArray (query : IQueryable<_>) = Async.Adapt query.ToArrayAsync
+  static member asyncToArray (query : IQueryable<_>) = Async.Adapt query.ToArrayAsync
 
   [<CompiledName("ToAsyncSequence")>]
-  let toAsyncSeq (query : IQueryable<_>) =
+  static member toAsyncSeq (query : IQueryable<_>) =
     let enumerator = query.ExecuteAsync().GetEnumerator ()
     AsyncSeq.unfoldAsync
       (fun (enumerator : IAsyncEnumerator<_>) -> async {
@@ -218,7 +228,41 @@ module Q =
       enumerator
 
   [<CompiledName("AsyncToFSharp")>]
-  let asyncToList query = toAsyncSeq query |> AsyncSeq.toList
+  static member asyncToList query = Q.toAsyncSeq query |> AsyncSeq.toList
 
   [<CompiledName("AsyncIterate")>]
-  let asyncIter action query = toAsyncSeq query |> AsyncSeq.iter action
+  static member asyncIter action query = Q.toAsyncSeq query |> AsyncSeq.iter action
+
+  [<CompiledName("AsyncTryGetFirst")>]
+  static member asyncTryFirst (query : IQueryable<_>) = async {
+    let! value = Async.Adapt query.FirstOrDefaultAsync
+    return Option.wrap value }
+
+[<AutoOpen>]
+module InterOp =
+
+  [<CompiledName("ToAsyncEnumerable")>]
+  let toAsyncEnumerable (asyncSeq : AsyncSeq<_>) =
+    { new System.Collections.Generic.IAsyncEnumerable<_> with
+        member __.GetEnumerator () =
+          let enumerator = asyncSeq.GetEnumerator ()
+          let current    = ref Unchecked.defaultof<_>
+          { new System.Collections.Generic.IAsyncEnumerator<_> with
+              member __.Current = !current
+              member __.MoveNext cancellationToken =
+                let computation = async {
+                  let! next = enumerator.MoveNext ()
+                  return
+                    match next with
+                    | Some value ->
+                      current := value
+                      true
+                    | _ ->
+                      current := Unchecked.defaultof<_>
+                      false }
+                Async.StartAsTask (computation, cancellationToken = cancellationToken)
+              member __.Dispose () =
+                current := Unchecked.defaultof<_>
+                enumerator.Dispose ()
+          }
+    }
