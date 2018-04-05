@@ -203,6 +203,12 @@ type Q private () =
     let selector' = Q.toLinqExpr1 selector
     fun (query : IQueryable<'a>) -> query.SelectMany selector'
 
+  [<CompiledName("Skip")>]
+  static member skip n (query : IQueryable<_>) = query.Skip n
+
+  [<CompiledName("Take")>]
+  static member take n (query : IQueryable<_>) = query.Take n
+
   [<CompiledName("AsyncCount")>]
   static member asyncCount (query : IQueryable<_>) = Async.Adapt query.CountAsync
 
@@ -226,6 +232,12 @@ type Q private () =
             None
       })
       enumerator
+
+  [<CompiledName("AsyncExists")>]
+  static member asyncExists predicate (query : IQueryable<_>) =
+    let predicate' = Q.toLinqExpr1 predicate
+    Async.Adapt (fun cancellationToken -> query.AnyAsync (predicate', cancellationToken))
+
 
   [<CompiledName("AsyncToFSharp")>]
   static member asyncToList query = Q.toAsyncSeq query |> AsyncSeq.toList

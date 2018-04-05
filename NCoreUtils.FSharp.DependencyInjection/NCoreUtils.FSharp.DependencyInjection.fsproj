@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="ServiceProviderExt.fs" />
     <Compile Include="ParameterBinding.fs" />
     <Compile Include="Bind.fs" />
   </ItemGroup>

@@ -2,33 +2,49 @@ namespace NCoreUtils
 open System
 #nowarn "64"
 
-open System
-
 [<AutoOpen>]
 module BindTopLevelOperator =
 
-  [<Sealed>]
-  type BindMonad () =
+  [<Sealed; AbstractClass>]
+  type BindMonad private () =
     static member inline Bind (_ : BindMonad, o : _ option, binder) =
       match o with
       | Some x -> binder x
       | _      -> None
     static member inline Bind (_ : BindMonad, n : Nullable<_>, binder) = Nullable.bind binder n
     static member inline Bind (_ : BindMonad, a : Async<_>, binder) = async.Bind (a, binder)
+    static member inline Bind (_ : BindMonad, res : Result<_,_>, binder) =
+      match res with
+      | Ok    value -> binder value
+      | Error error -> Error  error
 
-  [<Sealed>]
-  type FMapMonad () =
+  [<Sealed; AbstractClass>]
+  type AsyncBindMonad private () =
+    static member inline AsyncBind (_ : AsyncBindMonad, o : _ option, binder) =
+      match o with
+      | Some x -> binder x
+      | _      -> async.Return None
+    static member inline AsyncBind (_ : AsyncBindMonad, res : Result<_,_>, binder) =
+      match res with
+      | Ok    value -> binder value
+      | Error error -> async.Return <| Error error
+
+  [<Sealed; AbstractClass>]
+  type FMapMonad private () =
     static member inline FMap (_ : FMapMonad, o : _ option, mapper) =
       match o with
       | Some x -> Some (mapper x)
       | _      -> None
     static member inline FMap (_ : FMapMonad, n : Nullable<_>, mapper) = Nullable.map mapper n
-    static member inline FMap (_ : FMapMonad, a : Async<_>, mapper) = async {
-      let! x = a
-      return mapper x }
+    static member inline FMap (_ : FMapMonad, a : Async<_>, mapper) =
+      async.Bind (a, mapper >> async.Return)
+    static member inline FMap (_ : FMapMonad, res : Result<_,_>, binder) =
+      match res with
+      | Ok    value -> Ok (binder value)
+      | Error error -> Error error
 
-  [<Sealed>]
-  type ApplyMonad () =
+  [<Sealed; AbstractClass>]
+  type ApplyMonad private () =
     static member inline Apply (_ : ApplyMonad, o : _ option, applicant) =
       match o with
       | Some x ->
@@ -45,9 +61,14 @@ module BindTopLevelOperator =
       let! x = a
       do! applicant x
       return x }
+    static member inline Apply (_ : ApplyMonad, res : Result<_,_>, applicant) =
+      match res with
+      | Ok value -> applicant value
+      | _        -> ()
+      res
 
-  [<Sealed>]
-  type MkTupleMonad () =
+  [<Sealed; AbstractClass>]
+  type MkTupleMonad private () =
     static member inline MkTuple (_ : MkTupleMonad, o : _ option, supply) =
       match o with
       | Some x -> Some (x, supply x)
@@ -63,10 +84,28 @@ module BindTopLevelOperator =
     and  (^a or ^x) : (static member Bind : ^x * ^a * ^b -> ^c)
     = ((^a or ^x) : (static member Bind : ^x * ^a * ^b -> ^c) (Unchecked.defaultof<_>, source, binder))
 
+  let inline (=<<) (binder : ^b) (source : ^a) : ^c
+    when ^x :> BindMonad
+    and  (^a or ^x) : (static member Bind : ^x * ^a * ^b -> ^c)
+    = ((^a or ^x) : (static member Bind : ^x * ^a * ^b -> ^c) (Unchecked.defaultof<_>, source, binder))
+
+
+  let inline (>>!) (source : ^a) (binder : ^b) : ^c
+    when ^x :> AsyncBindMonad
+    and  (^a or ^x) : (static member AsyncBind : ^x * ^a * ^b -> ^c)
+    = ((^a or ^x) : (static member AsyncBind : ^x * ^a * ^b -> ^c) (Unchecked.defaultof<_>, source, binder))
+
+
   let inline (>>|) (source : ^a) (mapper : ^b) : ^c
     when ^x :> FMapMonad
     and  (^a or ^x) : (static member FMap : ^x * ^a * ^b -> ^c)
     = ((^a or ^x) : (static member FMap : ^x * ^a * ^b -> ^c) (Unchecked.defaultof<_>, source, mapper))
+
+  let inline (|<<) (mapper : ^b) (source : ^a) : ^c
+    when ^x :> FMapMonad
+    and  (^a or ^x) : (static member FMap : ^x * ^a * ^b -> ^c)
+    = ((^a or ^x) : (static member FMap : ^x * ^a * ^b -> ^c) (Unchecked.defaultof<_>, source, mapper))
+
 
   let inline (>>*) (source : ^a) (applicant : ^b) : ^c
     when ^x :> ApplyMonad
@@ -77,3 +116,13 @@ module BindTopLevelOperator =
     when ^x :> MkTupleMonad
     and  (^a or ^x) : (static member MkTuple : ^x * ^a * ^b -> ^c)
     = ((^a or ^x) : (static member MkTuple : ^x * ^a * ^b -> ^c) (Unchecked.defaultof<_>, source, supply))
+
+
+  let inline (>>=!) (source : Async<(^a)>) (binder : ^b) : Async<(^c)> =
+    async.Bind (source, fun value -> value >>! binder)
+
+  let inline (>>!=) (source : Async<(^a)>) (binder : ^b) : Async<(^c)> =
+    source >>| ((=<<) binder)
+
+  let inline (>>!|) (source : Async<(^a)>) (mapper : ^b) : Async<(^c)> =
+    source >>| ((|<<) mapper)

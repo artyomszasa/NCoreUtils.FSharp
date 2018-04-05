@@ -118,13 +118,13 @@ module ParameterBinding =
 
   [<Struct>]
   [<NoEquality; NoComparison>]
-  type private TypeOrInstance =
+  type TypeOrInstance =
     | BinderType     of BinderType:Type
     | BinderInstance of BinderInstance:IValueBinder
 
   // ************************************************************************
 
-  let private tryGetDefaultBinder =
+  let tryGetDefaultBinder =
     let dict = Dictionary ()
     [ typeof<string>,   DefaultStringParameterBinder     () :> IValueBinder |> BinderInstance
       typeof<byte>,     DefaultParameterBinder<byte>     () :> IValueBinder |> BinderInstance

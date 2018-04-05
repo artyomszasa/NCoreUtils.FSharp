@@ -4,6 +4,8 @@ open System.Collections.Generic
 open Microsoft.AspNetCore.Http
 open NCoreUtils
 
+type ParameterSource = string -> string list option
+
 type HttpMethod =
   | HttpGet
   | HttpPost
@@ -46,12 +48,20 @@ module HttpRequest =
   let httpMethod (request : HttpRequest) =
     request.Method |> HttpMethod.parse
 
+  [<CompiledName("GetHeaders")>]
+  let headers (request : HttpRequest) = request.Headers
+
+  [<CompiledName("GetBody")>]
+  let body (request : HttpRequest) = request.Body
+
+
   [<CompiledName("TryGetQueryParameters")>]
-  let tryQueryParameters (request : HttpRequest) name =
-    let mutable values = Unchecked.defaultof<_>
-    match request.Query.TryGetValue (name, &values) with
-    | true when values.Count > 0 -> values.ToArray () |> List.ofArray |> Some
-    | _                          -> None
+  let tryQueryParameters (request : HttpRequest) : ParameterSource =
+    fun name ->
+      let mutable values = Unchecked.defaultof<_>
+      match request.Query.TryGetValue (name, &values) with
+      | true when values.Count > 0 -> values.ToArray () |> List.ofArray |> Some
+      | _                          -> None
 
   [<CompiledName("TryGetQueryParameter")>]
   let tryQueryParameter (request : HttpRequest) name =
@@ -68,11 +78,12 @@ module HttpRequest =
         yield KeyValuePair (key, value) }
 
   [<CompiledName("TryGetFormParameters")>]
-  let tryFormParameters (request : HttpRequest) name =
-    let mutable values = Unchecked.defaultof<_>
-    match request.Form.TryGetValue (name, &values) with
-    | true when values.Count > 0 -> values.ToArray () |> List.ofArray |> Some
-    | _                          -> None
+  let tryFormParameters (request : HttpRequest) : ParameterSource =
+    fun name ->
+      let mutable values = Unchecked.defaultof<_>
+      match request.Form.TryGetValue (name, &values) with
+      | true when values.Count > 0 -> values.ToArray () |> List.ofArray |> Some
+      | _                          -> None
 
   [<CompiledName("TryGetFormParameter")>]
   let tryFormParameter (request : HttpRequest) name =
@@ -88,6 +99,23 @@ module HttpRequest =
       for value in kv.Value do
         yield KeyValuePair (key, value) }
 
+  // [<CompiledName("GetExternalScheme")>]
+  // let externalScheme (request : HttpRequest) =
+  //   let mutable values = Unchecked.defaultof<_>
+  //   match request.Headers.TryGetValue ("X-Forwarded-Proto", &values) with
+  //   | true when values.Count > 0 -> values |> Seq.head
+  //   | _                          -> request.Scheme
+  // [<CompiledName("GetHost")>]
+  // let externalHost (request : HttpRequest) =
+  //   match request.Host.HasValue with
+  //   | true -> request.Host.
+
+
+[<RequireQualifiedAccess>]
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module HttpResponse =
+
+  let setStatusCode statusCode (response : HttpResponse) = response.StatusCode <- statusCode
 
 [<RequireQualifiedAccess>]
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -95,7 +123,13 @@ module HttpContext =
 
   let inline request (httpContext : HttpContext) = httpContext.Request
 
+  let inline response (httpContext : HttpContext) = httpContext.Response
+
   let inline path httpContext = request httpContext |> HttpRequest.path
+
+  let inline requestHeaders httpContext = request httpContext |> HttpRequest.headers
+
+  let inline requestBody httpContext = request httpContext |> HttpRequest.body
 
   let inline httpMethod httpContext = request httpContext |> HttpRequest.httpMethod
 
@@ -112,6 +146,8 @@ module HttpContext =
   let inline getFormParameters httpContext = request httpContext |> HttpRequest.getFormParameters
 
   let requestServices (httpContext : HttpContext) = httpContext.RequestServices
+
+  let inline setResponseStatusCode statusCode = response >> HttpResponse.setStatusCode statusCode
 
   let asyncBindAndExecute (httpContext : HttpContext) tryGetParameters action =
     DependencyInjection.asyncBindAndExecuteWith httpContext requestServices tryGetParameters action
