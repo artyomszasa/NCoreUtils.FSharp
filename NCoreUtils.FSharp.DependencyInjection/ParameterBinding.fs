@@ -8,6 +8,7 @@ open System.ComponentModel
 open System.Runtime.CompilerServices
 open System.Collections.Generic
 open Microsoft.Extensions.DependencyInjection
+open System
 
 [<AttributeUsage(AttributeTargets.Class ||| AttributeTargets.Struct ||| AttributeTargets.Property, AllowMultiple = false)>]
 type ParameterNameAttribute (name : string) =
@@ -116,6 +117,26 @@ module ParameterBinding =
       | :? (byte[]) as bytes  -> Guid bytes
       | _ -> invalidOpf "Unable to convert object of type %s to Guid" <| raw.GetType().FullName
 
+  type EnumParameterBinder<'e when 'e : (new : unit -> 'e) and 'e :> ValueType and 'e : struct> () =
+    inherit DefaultParameterBinder<'e> ()
+    static let underlyingType = Enum.GetUnderlyingType typeof<'e>
+    override __.Convert raw =
+      match raw with
+      | null -> invalidOpf "null cannot be converted to %s" typeof<'e>.FullName
+      | :? string as str ->
+        let mutable result = Unchecked.defaultof<_>
+        match Enum.TryParse<'e> (str, true, &result) with
+        | true -> result
+        | _ ->
+          try
+            let i = Convert.ChangeType (str, underlyingType)
+            Enum.ToObject (typeof<'e>, i) :?> 'e
+          with _ ->
+            invalidOpf "\"%s\" cannot be converted to %s" str typeof<'e>.FullName
+      | obj when obj.GetType () = underlyingType ->
+        Enum.ToObject (typeof<'e>, obj) :?> 'e
+      | _ -> invalidOpf "Object of type %s cannot be converted to %s" (raw.GetType().FullName) typeof<'e>.FullName
+
   [<Struct>]
   [<NoEquality; NoComparison>]
   type TypeOrInstance =
@@ -132,9 +153,9 @@ module ParameterBinding =
       typeof<uint32>,   DefaultParameterBinder<uint32>   () :> IValueBinder |> BinderInstance
       typeof<uint64>,   DefaultParameterBinder<uint64>   () :> IValueBinder |> BinderInstance
       typeof<sbyte>,    DefaultParameterBinder<sbyte >   () :> IValueBinder |> BinderInstance
-      typeof<int16>,    DefaultParameterBinder<uint16>   () :> IValueBinder |> BinderInstance
-      typeof<int32>,    DefaultParameterBinder<uint32>   () :> IValueBinder |> BinderInstance
-      typeof<int64>,    DefaultParameterBinder<uint64>   () :> IValueBinder |> BinderInstance
+      typeof<int16>,    DefaultParameterBinder<int16>    () :> IValueBinder |> BinderInstance
+      typeof<int32>,    DefaultParameterBinder<int32>    () :> IValueBinder |> BinderInstance
+      typeof<int64>,    DefaultParameterBinder<int64>    () :> IValueBinder |> BinderInstance
       typeof<single>,   DefaultParameterBinder<single>   () :> IValueBinder |> BinderInstance
       typeof<float>,    DefaultParameterBinder<float>    () :> IValueBinder |> BinderInstance
       typeof<char>,     DefaultParameterBinder<char>     () :> IValueBinder |> BinderInstance
@@ -146,6 +167,9 @@ module ParameterBinding =
       let mutable binder = Unchecked.defaultof<_>
       match dict.TryGetValue (``type``, &binder) with
       | true -> Some binder
+      | _    ->
+      match ``type``.IsEnum with
+      | true -> typedefof<EnumParameterBinder<_>>.MakeGenericType ``type`` |> BinderType |> Some
       | _    -> None
 
   let rec asyncBindParameter (serviceProvider : IServiceProvider) tryGetParameters (descriptor : ParameterDescriptor) =

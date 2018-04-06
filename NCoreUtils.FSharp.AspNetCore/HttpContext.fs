@@ -1,5 +1,6 @@
 namespace NCoreUtils.AspNetCore
 
+open System
 open System.Collections.Generic
 open Microsoft.AspNetCore.Http
 open NCoreUtils
@@ -38,10 +39,12 @@ module HttpMethod =
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module HttpRequest =
 
+  let private splitChars = [| '/' |]
+
   [<CompiledName("GetPath")>]
   let path (request : HttpRequest) =
     match request.Path with
-    | path when path.HasValue -> path.Value.Trim('/').Split '/' |> Seq.map CaseInsensitive |> List.ofSeq
+    | path when path.HasValue -> path.Value.Trim('/').Split(splitChars, StringSplitOptions.RemoveEmptyEntries) |> Seq.map CaseInsensitive |> List.ofSeq
     | _                       -> []
 
   [<CompiledName("GetHttpMethod")>]
