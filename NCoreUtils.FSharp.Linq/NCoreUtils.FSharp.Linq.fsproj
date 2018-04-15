@@ -1,6 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <Version>1.0.1</Version>
+    <!-- NuGet -->
+    <PackageId>NCoreUtils.FSharp.Linq</PackageId>
+    <Title>$(PackageId)</Title>
+    <Authors>Artyom Antyipin</Authors>
+    <Description>F# friendly Linq extesnions.</Description>
+    <Copyright>Artyom Antyipin</Copyright>
+    <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.FSharp.git</RepositoryUrl>
+    <PackageReleaseNotes>Fix convariance in return types of transformed quotations.</PackageReleaseNotes>
+    <!-- Assembly Info -->
+    <Product>NCoreUtils</Product>
+    <AssemblyName>$(PackageId)</AssemblyName>
+    <AssemblyTitle>$(AssemblyName)</AssemblyTitle>
+    <!-- Compilation -->
+    <OutputType>Library</OutputType>
+    <DebugType>portable</DebugType>
+    <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile> -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <!-- mono fix -->
   <PropertyGroup>

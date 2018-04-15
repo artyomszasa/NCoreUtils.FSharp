@@ -175,18 +175,34 @@ type Q private () =
       }
     visitor.Visit : Expression -> Expression
 
+  static let fixConvariance returnType (lambda : LambdaExpression) =
+    match lambda.ReturnType = returnType with
+    | true -> lambda
+    | _ ->
+    match returnType.IsAssignableFrom lambda.ReturnType with
+    | true ->
+      let targs = lambda.Type.GenericTypeArguments |> Seq.toArray
+      targs.[targs.Length - 1] <- returnType
+      let delegateType = lambda.Type.GetGenericTypeDefinition().MakeGenericType targs
+      Expression.Lambda(delegateType, lambda.Body, lambda.Parameters)
+    | _ ->
+      sprintf "Unable to downcast %A to %A" lambda.ReturnType returnType
+      |> InvalidCastException
+      |> raise
+
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-  static let toLinqExprImpl (quotation : Expr) =
+  static let toLinqExprImpl returnType (quotation : Expr) =
     QuotationToExpression quotation
     |> fixNewExpressions
     |> replaceSequenceMethods
     |> fsharpFuncToLambda
+    |> fixConvariance returnType
 
   [<CompiledName("ToLinqExpression1")>]
-  static member toLinqExpr1 (quotation : Expr<'a -> 'b>) = toLinqExprImpl quotation :?> Expression<Func<'a, 'b>>
+  static member toLinqExpr1 (quotation : Expr<'a -> 'b>) = toLinqExprImpl typeof<'b> quotation :?> Expression<Func<'a, 'b>>
 
   [<CompiledName("ToLinqExpression2")>]
-  static member toLinqExpr2 (quotation : Expr<'a -> 'b -> 'c>) = toLinqExprImpl quotation :?> Expression<Func<'a, 'b, 'c>>
+  static member toLinqExpr2 (quotation : Expr<'a -> 'b -> 'c>) = toLinqExprImpl typeof<'c> quotation :?> Expression<Func<'a, 'b, 'c>>
 
   [<CompiledName("Filter")>]
   static member filter ([<ReflectedDefinition>] predicate : Expr<'a -> bool>) =
