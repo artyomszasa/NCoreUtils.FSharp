@@ -173,32 +173,35 @@ module ParameterBinding =
       | _    -> None
 
   let rec asyncBindParameter (serviceProvider : IServiceProvider) tryGetParameters (descriptor : ParameterDescriptor) =
-    let path =
-      let usePropertyName () =
-        match descriptor.Attributes with
-        | :? PropertyInfo as prop -> Some prop.Name
-        | _ -> None
-      descriptor.Attributes.TryGetAttribute<ParameterNameAttribute> ()
-      >>| ParameterNameAttribute.GetName
-      |?= usePropertyName
-      |?  String.Empty
-      |>  concatPath descriptor.Path
-    match FSharpType.IsRecord (descriptor.Type, true) with
-    | true ->
-      FSharpType.GetRecordFields (descriptor.Type, true)
-      |> Array.map (ParameterDescriptor.ofProperty path >> asyncBindParameter serviceProvider tryGetParameters)
-      |> Async.Sequential
-      >>| mkRecord descriptor.Type
+    match descriptor.Type with
+    | t when t = typeof<unit> -> async.Return (box ())
     | _ ->
-      let binder =
-        match descriptor.Attributes.TryGetAttribute<ParameterBinderAttribute> () with
-        | Some attr -> ActivatorUtilities.CreateInstance (serviceProvider, attr.BinderType) :?> IValueBinder
-        | _         ->
-        match tryGetDefaultBinder descriptor.Type with
-        | Some (BinderType binderType) -> ActivatorUtilities.CreateInstance (serviceProvider, binderType) :?> IValueBinder
-        | Some (BinderInstance binder) -> binder
-        | _ -> invalidOpf "no default binder for type %s" descriptor.Type.FullName
-      binder.AsyncBind ({ descriptor with Path = path }, tryGetParameters)
+      let path =
+        let usePropertyName () =
+          match descriptor.Attributes with
+          | :? PropertyInfo as prop -> Some prop.Name
+          | _ -> None
+        descriptor.Attributes.TryGetAttribute<ParameterNameAttribute> ()
+        >>| ParameterNameAttribute.GetName
+        |?= usePropertyName
+        |?  String.Empty
+        |>  concatPath descriptor.Path
+      match FSharpType.IsRecord (descriptor.Type, true) with
+      | true ->
+        FSharpType.GetRecordFields (descriptor.Type, true)
+        |> Array.map (ParameterDescriptor.ofProperty path >> asyncBindParameter serviceProvider tryGetParameters)
+        |> Async.Sequential
+        >>| mkRecord descriptor.Type
+      | _ ->
+        let binder =
+          match descriptor.Attributes.TryGetAttribute<ParameterBinderAttribute> () with
+          | Some attr -> ActivatorUtilities.CreateInstance (serviceProvider, attr.BinderType) :?> IValueBinder
+          | _         ->
+          match tryGetDefaultBinder descriptor.Type with
+          | Some (BinderType binderType) -> ActivatorUtilities.CreateInstance (serviceProvider, binderType) :?> IValueBinder
+          | Some (BinderInstance binder) -> binder
+          | _ -> invalidOpf "no default binder for type %s" descriptor.Type.FullName
+        binder.AsyncBind ({ descriptor with Path = path }, tryGetParameters)
 
   let asyncBindObject serviceProvider tryGetValues path ``type`` attributes =
     asyncBindParameter serviceProvider tryGetValues { Path = path; Type = ``type``; Attributes = attributes }
