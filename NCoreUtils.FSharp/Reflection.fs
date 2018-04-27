@@ -18,3 +18,15 @@ module ReflectionTopLevelOperators =
     match FSharpType.IsRecord (ty, true) with
     | true -> FSharpType.GetRecordFields (ty, true) |> Some
     | _ -> None
+
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let (|UnionType|_|) ty =
+    match FSharpType.IsUnion (ty, true) with
+    | true -> FSharpType.GetUnionCases (ty, true) |> Some
+    | _    -> None
+
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let (|ExceptionType|_|) ty =
+    match FSharpType.IsExceptionRepresentation (ty, true) with
+    | true -> FSharpType.GetExceptionFields (ty, true) |> Some
+    | _    -> None

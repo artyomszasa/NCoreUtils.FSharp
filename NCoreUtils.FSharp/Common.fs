@@ -103,11 +103,37 @@ module Common =
       | true -> Some v
       | _    -> None
 
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  [<DebuggerStepThrough>]
+  [<CompiledName("TrySingle")>]
+  let trySingle input =
+    match input with
+    | null -> None
+    | _    ->
+      let mutable v = Unchecked.defaultof<_>
+      match System.Single.TryParse (input, NumberStyles.Float, CultureInfo.InvariantCulture, &v) with
+      | true -> Some v
+      | _    -> None
+
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  [<DebuggerStepThrough>]
+  [<CompiledName("TryDouble")>]
+  let tryDouble input =
+    match input with
+    | null -> None
+    | _    ->
+      let mutable v = Unchecked.defaultof<_>
+      match System.Double.TryParse (input, NumberStyles.Float, CultureInfo.InvariantCulture, &v) with
+      | true -> Some v
+      | _    -> None
+
   // aliases
 
   let inline tryInt input = tryInt32 input
 
   let inline trySByte input = tryInt8 input
+
+  let inline tryFloat input = tryDouble input
 
   // extensions
 

@@ -56,6 +56,65 @@ module Nullable =
   let iter f (n : Nullable<_>) =
     if n.HasValue then f n.Value
 
+  [<CompiledName("DefaultWith")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let defaultWith defThunk (n : Nullable<_>) =
+    match n.HasValue with
+    | true -> n.Value
+    | _    -> defThunk ()
+
+  [<CompiledName("OrElse")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let orElse ifNone (n : Nullable<_>) =
+    match n.HasValue with
+    | true -> n
+    | _    -> ifNone
+
+  [<CompiledName("OrElseWith")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let orElseWith ifNoneThunk (n : Nullable<_>) =
+    match n.HasValue with
+    | true -> n
+    | _    -> ifNoneThunk ()
+
+  [<CompiledName("Count")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let count (n : Nullable<_>) = if n.HasValue then 1 else 0
+
+  [<CompiledName("Fold")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let fold folder state (n : Nullable<_>) =
+    match n.HasValue with
+    | true -> folder state n.Value
+    | _    -> state
+
+  [<CompiledName("FoldBack")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let foldBack folder (n : Nullable<_>) state =
+    match n.HasValue with
+    | false -> state
+    | _     -> folder n.Value state
+
+  [<CompiledName("Exists")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let exists predicate (n : Nullable<_>) = n.HasValue && predicate n.Value
+
+  [<CompiledName("ForAll")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let forall predicate (n : Nullable<_>) = not n.HasValue || predicate n.Value
+
+  [<CompiledName("Contains")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let inline contains value (n : Nullable<_>) = n.HasValue && n.Value = value
+
+  [<CompiledName("Map2")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let map2 mapping (n1 : Nullable<_>) (n2 : Nullable<_>) =
+    match n1.HasValue, n2.HasValue with
+    | true, true -> mapping n1.Value n2.Value |> mk
+    | _          -> empty
+
+
 [<AutoOpen>]
 module NullableTopLevelExtra =
 

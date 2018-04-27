@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
   <!-- mono fix -->
   <PropertyGroup>
@@ -21,6 +21,7 @@
     <Compile Include="IO.fs" />
     <Compile Include="Data.fs" />
     <Compile Include="Reflection.fs" />
+    <Compile Include="Result.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Control.AsyncSeq" Version="2.0.20" />

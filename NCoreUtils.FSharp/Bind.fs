@@ -38,10 +38,13 @@ module BindTopLevelOperator =
     static member inline FMap (_ : FMapMonad, n : Nullable<_>, mapper) = Nullable.map mapper n
     static member inline FMap (_ : FMapMonad, a : Async<_>, mapper) =
       async.Bind (a, mapper >> async.Return)
-    static member inline FMap (_ : FMapMonad, res : Result<_,_>, binder) =
+    static member inline FMap (_ : FMapMonad, res : Result<_,_>, mapper) =
       match res with
-      | Ok    value -> Ok (binder value)
+      | Ok    value -> Ok (mapper value)
       | Error error -> Error error
+    static member inline FMap (_ : FMapMonad, l, mapper) = List.map mapper l
+    static member inline FMap (_ : FMapMonad, seq, mapper) = Seq.map mapper seq
+    static member inline FMap (_ : FMapMonad, array, mapper) = Array.map mapper array
 
   [<Sealed; AbstractClass>]
   type ApplyMonad private () =
@@ -66,6 +69,9 @@ module BindTopLevelOperator =
       | Ok value -> applicant value
       | _        -> ()
       res
+    static member inline Apply (_ : ApplyMonad, l, applicant) = List.iter applicant l
+    static member inline Apply (_ : ApplyMonad, seq, applicant) = Seq.iter applicant seq
+    static member inline Apply (_ : ApplyMonad, array, applicant) = Array.iter applicant array
 
   [<Sealed; AbstractClass>]
   type MkTupleMonad private () =
