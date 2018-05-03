@@ -135,6 +135,20 @@ module Common =
 
   let inline tryFloat input = tryDouble input
 
+  // patterns
+
+  let inline (|Int8String|_|) input = tryInt8 input
+
+  let inline (|Int16String|_|) input = tryInt16 input
+
+  let inline (|Int32String|_|) input = tryInt32 input
+
+  let inline (|Int64String|_|) input = tryInt64 input
+
+  let inline (|SingleString|_|) input = trySingle input
+
+  let inline (|DoubleString|_|) input = tryDouble input
+
   // extensions
 
   [<CompiledName("PrintFormatToStringThenThrowInvalidOperationException")>]
