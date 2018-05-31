@@ -25,3 +25,14 @@ module IOExtensions =
 
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     member this.AsyncFlush () = Async.Adapt this.FlushAsync
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+module Stream =
+
+  [<CompiledName("AsyncCopyTo")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let asyncCopyTo (destination : Stream) (source : Stream) = source.AsyncCopyTo destination
+
+  [<CompiledName("AsyncCopyTo")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let asyncCopyToWithBufferSize bufferSize (destination : Stream) (source : Stream) = source.AsyncCopyTo (destination, bufferSize)
