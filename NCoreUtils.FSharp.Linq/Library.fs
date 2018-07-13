@@ -14,6 +14,50 @@ open System.Collections.Immutable
 open System.Collections.Generic
 open System.Linq
 
+[<Sealed>]
+type public ConstantBox<'a> =
+  val mutable public Value : 'a
+  new () = { Value = Unchecked.defaultof<_> }
+
+[<AbstractClass>]
+type private ConstantBoxFactory internal () =
+  static let boxedTypes =
+    [|  typeof<byte>
+        typeof<uint16>
+        typeof<uint32>
+        typeof<uint64>
+        typeof<sbyte>
+        typeof<int16>
+        typeof<int32>
+        typeof<int64>
+        typeof<single>
+        typeof<float>
+        typeof<decimal>
+        typeof<string>
+        typeof<char>
+        typeof<Guid>
+        typeof<DateTime>
+        typeof<DateTimeOffset> |]
+  static let factories =
+    let factories = System.Collections.Generic.Dictionary ()
+    for ty in boxedTypes do
+      let factory = Activator.CreateInstance (typedefof<ConstantBoxFactory<_>>.MakeGenericType ty, true) :?> ConstantBoxFactory
+      factories.Add (ty, factory)
+    factories
+  abstract Create : value:obj -> Expression
+  static member BoxedTypes with [<MethodImpl(MethodImplOptions.AggressiveInlining)>] get () = boxedTypes
+  static member Create (ty : Type, value : obj) =
+    factories.[ty].Create value
+
+and [<Sealed>] private ConstantBoxFactory<'a> internal () =
+  inherit ConstantBoxFactory ()
+  static let field = typeof<ConstantBox<'a>>.GetField ("Value", BindingFlags.Public ||| BindingFlags.Instance ||| BindingFlags.DeclaredOnly)
+  override __.Create value =
+    let v = value :?> 'a
+    let box = ConstantBox<'a> (Value = v)
+    Expression.Field (Expression.Constant (box, typeof<ConstantBox<'a>>), field) :> _
+
+
 [<AbstractClass; Sealed>]
 [<SuppressMessage("NameConventions", "*")>]
 type Q private () =
@@ -43,6 +87,17 @@ type Q private () =
     match le.Parameters with
     | args when args.Count = 1 -> Some (args.[0], le.Body)
     | _ -> None
+
+  static let constantBoxVisitor =
+    { new ExpressionVisitor () with
+        override __.VisitConstant node =
+          match Array.contains node.Type ConstantBoxFactory.BoxedTypes with
+          | false -> node :> _
+          | _     -> ConstantBoxFactory.Create (node.Type, node.Value)
+    }
+
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  static let boxContants (e : Expression) = constantBoxVisitor.Visit e
 
   /// <summary>
   /// Fixes new expression when creating F# types (only Tuples and Records supported at the moment)
@@ -195,6 +250,7 @@ type Q private () =
     QuotationToExpression quotation
     |> fixNewExpressions
     |> replaceSequenceMethods
+    |> boxContants
     |> fsharpFuncToLambda
     |> fixConvariance returnType
 
@@ -250,9 +306,9 @@ type Q private () =
       enumerator
 
   [<CompiledName("AsyncExists")>]
-  static member asyncExists predicate (query : IQueryable<_>) =
+  static member asyncExists ([<ReflectedDefinition>] predicate) =
     let predicate' = Q.toLinqExpr1 predicate
-    Async.Adapt (fun cancellationToken -> query.AnyAsync (predicate', cancellationToken))
+    fun (query : IQueryable<_>) -> Async.Adapt (fun cancellationToken -> query.AnyAsync (predicate', cancellationToken))
 
 
   [<CompiledName("AsyncToFSharp")>]
@@ -260,6 +316,9 @@ type Q private () =
 
   [<CompiledName("AsyncIterate")>]
   static member asyncIter action query = Q.toAsyncSeq query |> AsyncSeq.iter action
+
+  [<CompiledName("AsyncIterateAsync")>]
+  static member asyncIterAsync asyncAction query = Q.toAsyncSeq query |> AsyncSeq.iterAsync asyncAction
 
   [<CompiledName("AsyncTryGetFirst")>]
   static member asyncTryFirst (query : IQueryable<_>) = async {
