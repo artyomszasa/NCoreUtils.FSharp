@@ -19,6 +19,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NCoreUtils.FSharp.Unit.Depe
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NCoreUtils.FSharp.Logging", "NCoreUtils.FSharp.Logging\NCoreUtils.FSharp.Logging.fsproj", "{44C8F9E6-4499-4837-A476-E80EFA2407F3}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NCoreUtils.FSharp.Storage", "NCoreUtils.FSharp.Storage\NCoreUtils.FSharp.Storage.fsproj", "{2C4568D9-A97D-45FF-8A3E-170655863259}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,5 +130,17 @@ Global
 		{44C8F9E6-4499-4837-A476-E80EFA2407F3}.Release|x64.Build.0 = Release|x64
 		{44C8F9E6-4499-4837-A476-E80EFA2407F3}.Release|x86.ActiveCfg = Release|x86
 		{44C8F9E6-4499-4837-A476-E80EFA2407F3}.Release|x86.Build.0 = Release|x86
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Debug|x64.Build.0 = Debug|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Debug|x86.Build.0 = Debug|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Release|x64.ActiveCfg = Release|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Release|x64.Build.0 = Release|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Release|x86.ActiveCfg = Release|Any CPU
+		{2C4568D9-A97D-45FF-8A3E-170655863259}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
