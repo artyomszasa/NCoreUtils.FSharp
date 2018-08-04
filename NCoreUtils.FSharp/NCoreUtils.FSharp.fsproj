@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.FSharp</PackageId>
     <Title>$(PackageId)</Title>
@@ -9,7 +9,7 @@
     <Description>F# friendly extensions for .NET.</Description>
     <Copyright>Artyom Antyipin</Copyright>
     <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.FSharp.git</RepositoryUrl>
-    <PackageReleaseNotes>NuGet dependencies version bump.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added Seq.mapToArray.</PackageReleaseNotes>
     <!-- Assembly Info -->
     <Product>NCoreUtils</Product>
     <AssemblyName>$(PackageId)</AssemblyName>
@@ -40,6 +40,8 @@
     <Compile Include="Reflection.fs" />
     <Compile Include="Result.fs" />
     <Compile Include="Net.fs" />
+    <Compile Include="Seq.fs" />
+    <Compile Include="AsyncResult.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Control.AsyncSeq" Version="2.0.21" />

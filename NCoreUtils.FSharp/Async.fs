@@ -71,3 +71,4 @@ type Microsoft.FSharp.Control.Async with
       let! item = computations.[i]
       result.[i] <- item
     return result }
+
