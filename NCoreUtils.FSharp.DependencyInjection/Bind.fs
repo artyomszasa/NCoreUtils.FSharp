@@ -10,6 +10,12 @@ let inline tryService<'a> (serviceProvider : IServiceProvider) =
   | boxed -> Some (boxed :?> 'a)
 
 [<RequiresExplicitTypeArguments>]
+let inline tryServiceValue<'a> (serviceProvider : IServiceProvider) =
+  match serviceProvider.GetService typeof<'a> with
+  | null  -> ValueNone
+  | boxed -> ValueSome (boxed :?> 'a)
+
+[<RequiresExplicitTypeArguments>]
 let inline getService<'a> (serviceProvider : IServiceProvider) =
   match serviceProvider.GetService typeof<'a> with
   | null  -> invalidOpf "Unable to get service for %s" typeof<'a>.FullName

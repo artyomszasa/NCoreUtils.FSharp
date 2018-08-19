@@ -37,6 +37,12 @@ module Option =
 [<AutoOpen>]
 module OptionTopLevelOperators =
 
-  let (!?) = Option.getOrUndef
-
   let (|?=) option supply = Option.trySupply supply option
+
+[<AutoOpen>]
+module ValueOptionTopLevelOperators =
+
+  let (|?=) option supply =
+    match option with
+    | ValueSome _ -> option
+    | _           -> supply ()

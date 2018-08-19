@@ -21,6 +21,13 @@ module Nullable =
     | Some x -> Nullable x
     | _      -> Nullable ()
 
+  [<CompiledName("OfValueOption")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let ofValueOption o =
+    match o with
+    | ValueSome x -> Nullable x
+    | _           -> Nullable ()
+
   [<GeneralizableValue>]
   [<CompiledName("Empty")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]

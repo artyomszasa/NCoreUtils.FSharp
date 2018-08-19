@@ -31,9 +31,9 @@ module HttpMethod =
 
   let parse (input : string) =
     let ci = CaseInsensitive input
-    match Map.tryFind ci wellKnownMethods with
-    | Some m -> m
-    | _      -> HttpCustom ci
+    match wellKnownMethods.TryGetValue ci with
+    | (true, m) -> m
+    | _         -> HttpCustom ci
 
 [<RequireQualifiedAccess>]
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]

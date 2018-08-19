@@ -35,8 +35,7 @@ module DbCommandExtensions =
     let asyncReadDbDataReader selector reader =
       AsyncSeq.unfoldAsync
         (fun (reader : DbDataReader) -> async {
-          let! next = reader.AsyncRead ()
-          match next with
+          match! reader.AsyncRead () with
           | true ->
             let! item = selector reader
             return Some (item, reader)

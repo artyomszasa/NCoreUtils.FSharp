@@ -47,8 +47,8 @@ module ParameterBinding =
     member internal this.TryGetAttribute<'attribute when 'attribute :> Attribute> (?``inherit``) =
       let attrs = this.GetCustomAttributes (typeof<'attribute>, defaultArg ``inherit`` true)
       match attrs.Length with
-      | 0 -> None
-      | _ -> Some (attrs.[0] :?> 'attribute)
+      | 0 -> ValueNone
+      | _ -> ValueSome (attrs.[0] :?> 'attribute)
 
 
   let internal noCustomAttributes =
@@ -95,11 +95,11 @@ module ParameterBinding =
         | Some (raw :: _) -> this.Convert raw
         | _               ->
           match descriptor.Attributes.TryGetAttribute<DefaultValueAttribute> () with
-          | Some attr ->
+          | ValueSome attr ->
             match attr.Value with
             | :? 'a as defaultValue -> defaultValue
             | defaultValue          -> this.Convert defaultValue
-          | None -> missing descriptor.Path
+          | _ -> missing descriptor.Path
       async.Return <| box value
     interface IValueBinder with
       member this.AsyncBind (descriptor, tryGetParameters) = this.AsyncBind (descriptor, tryGetParameters)
@@ -179,8 +179,8 @@ module ParameterBinding =
       let path =
         let usePropertyName () =
           match descriptor.Attributes with
-          | :? PropertyInfo as prop -> Some prop.Name
-          | _ -> None
+          | :? PropertyInfo as prop -> ValueSome prop.Name
+          | _ -> ValueNone
         descriptor.Attributes.TryGetAttribute<ParameterNameAttribute> ()
         >>| ParameterNameAttribute.GetName
         |?= usePropertyName
@@ -195,7 +195,7 @@ module ParameterBinding =
       | _ ->
         let binder =
           match descriptor.Attributes.TryGetAttribute<ParameterBinderAttribute> () with
-          | Some attr -> ActivatorUtilities.CreateInstance (serviceProvider, attr.BinderType) :?> IValueBinder
+          | ValueSome attr -> ActivatorUtilities.CreateInstance (serviceProvider, attr.BinderType) :?> IValueBinder
           | _         ->
           match tryGetDefaultBinder descriptor.Type with
           | Some (BinderType binderType) -> ActivatorUtilities.CreateInstance (serviceProvider, binderType) :?> IValueBinder

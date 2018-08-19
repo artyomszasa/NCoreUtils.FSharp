@@ -14,10 +14,9 @@ module IOExtensions =
     member this.AsyncReadComplete (buffer, offset, count) =
       let rec readSome (read) = async {
         if read < count then
-          let! readOnce = this.AsyncRead (buffer, offset + read, count - read)
-          match readOnce with
-          | 0 -> EndOfStreamException () |> raise
-          | _ -> do! readSome (read + readOnce) }
+          match! this.AsyncRead (buffer, offset + read, count - read) with
+          | 0        -> EndOfStreamException () |> raise
+          | readOnce -> do! readSome (read + readOnce) }
       readSome 0
 
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]

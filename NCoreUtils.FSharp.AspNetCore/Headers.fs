@@ -27,6 +27,13 @@ let tryGetFirst headerName (headers : IHeaderDictionary) =
   | true when values.Count > 0 -> Some values.[0]
   | _                          -> None
 
+[<CompiledName("TryGetFirstHeaderAsValue")>]
+let tryGetFirstValue headerName (headers : IHeaderDictionary) =
+  let mutable values = Unchecked.defaultof<_>
+  match headers.TryGetValue (headerName, &values) with
+  | true when values.Count > 0 -> ValueSome values.[0]
+  | _                          -> ValueNone
+
 [<CompiledName("TryGetHeaders")>]
 let tryGet headerName (headers : IHeaderDictionary) =
   let mutable values = Unchecked.defaultof<_>
@@ -42,6 +49,9 @@ let resGetFirst headerName (headers : IHeaderDictionary) =
 
 [<CompiledName("TryGetContentType")>]
 let tryGetContentType headers = tryGetFirst ContentType headers
+
+[<CompiledName("TryGetContentTypeAsValue")>]
+let tryGetContentTypeValue headers = tryGetFirstValue ContentType headers
 
 [<CompiledName("ToSequence")>]
 let toSeq (headers : IHeaderDictionary) = seq {

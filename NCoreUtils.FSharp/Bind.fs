@@ -11,6 +11,10 @@ module BindTopLevelOperator =
       match o with
       | Some x -> binder x
       | _      -> None
+    static member inline Bind (_ : BindMonad, o : _ voption, binder) =
+      match o with
+      | ValueSome x -> binder x
+      | _           -> ValueNone
     static member inline Bind (_ : BindMonad, n : Nullable<_>, binder) = Nullable.bind binder n
     static member inline Bind (_ : BindMonad, a : Async<_>, binder) = async.Bind (a, binder)
     static member inline Bind (_ : BindMonad, res : Result<_,_>, binder) =
@@ -24,6 +28,10 @@ module BindTopLevelOperator =
       match o with
       | Some x -> binder x
       | _      -> async.Return None
+    static member inline AsyncBind (_ : AsyncBindMonad, o : _ voption, binder) =
+      match o with
+      | ValueSome x -> binder x
+      | _           -> async.Return ValueNone
     static member inline AsyncBind (_ : AsyncBindMonad, res : Result<_,_>, binder) =
       match res with
       | Ok    value -> binder value
@@ -35,6 +43,10 @@ module BindTopLevelOperator =
       match o with
       | Some x -> Some (mapper x)
       | _      -> None
+    static member inline FMap (_ : FMapMonad, o : _ voption, mapper) =
+      match o with
+      | ValueSome x -> ValueSome (mapper x)
+      | _           -> ValueNone
     static member inline FMap (_ : FMapMonad, n : Nullable<_>, mapper) = Nullable.map mapper n
     static member inline FMap (_ : FMapMonad, a : Async<_>, mapper) =
       async.Bind (a, mapper >> async.Return)
@@ -53,6 +65,11 @@ module BindTopLevelOperator =
       | Some x ->
         applicant x
       | _      -> ()
+      o
+    static member inline Apply (_ : ApplyMonad, o : _ voption, applicant) =
+      match o with
+      | ValueSome x -> applicant x
+      | _           -> ()
       o
     static member inline Apply (_ : ApplyMonad, n : Nullable<_>, applicant) =
       match n.HasValue with
@@ -79,6 +96,10 @@ module BindTopLevelOperator =
       match o with
       | Some x -> Some (x, supply x)
       | _      -> None
+    static member inline MkTuple (_ : MkTupleMonad, o : _ voption, supply) =
+      match o with
+      | ValueSome x -> ValueSome (x, supply x)
+      | _           -> ValueNone
     static member inline MkTuple (_ : MkTupleMonad, a : Async<_>, supply) = async {
       let! x = a
       let! y = supply x
