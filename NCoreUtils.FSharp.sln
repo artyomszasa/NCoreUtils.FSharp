@@ -23,6 +23,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NCoreUtils.FSharp.Storage",
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NCoreUtils.FSharp.Interop", "NCoreUtils.FSharp.Interop\NCoreUtils.FSharp.Interop.fsproj", "{732D2DBD-84EA-4D4E-AD9A-29B8293EF63F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NCoreUtils.Unit", "NCoreUtils.Unit\NCoreUtils.Unit.fsproj", "{08853634-8A7C-46FE-A655-B6EB47A68934}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -156,5 +158,17 @@ Global
 		{732D2DBD-84EA-4D4E-AD9A-29B8293EF63F}.Release|x64.Build.0 = Release|Any CPU
 		{732D2DBD-84EA-4D4E-AD9A-29B8293EF63F}.Release|x86.ActiveCfg = Release|Any CPU
 		{732D2DBD-84EA-4D4E-AD9A-29B8293EF63F}.Release|x86.Build.0 = Release|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Debug|x64.Build.0 = Debug|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Debug|x86.Build.0 = Debug|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Release|x64.ActiveCfg = Release|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Release|x64.Build.0 = Release|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Release|x86.ActiveCfg = Release|Any CPU
+		{08853634-8A7C-46FE-A655-B6EB47A68934}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
