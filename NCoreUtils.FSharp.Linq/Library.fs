@@ -324,32 +324,3 @@ type Q private () =
   static member asyncTryFirst (query : IQueryable<_>) = async {
     let! value = Async.Adapt query.FirstOrDefaultAsync
     return Option.wrap value }
-
-[<AutoOpen>]
-module InterOp =
-
-  [<CompiledName("ToAsyncEnumerable")>]
-  let toAsyncEnumerable (asyncSeq : AsyncSeq<_>) =
-    { new System.Collections.Generic.IAsyncEnumerable<_> with
-        member __.GetEnumerator () =
-          let enumerator = asyncSeq.GetEnumerator ()
-          let current    = ref Unchecked.defaultof<_>
-          { new System.Collections.Generic.IAsyncEnumerator<_> with
-              member __.Current = !current
-              member __.MoveNext cancellationToken =
-                let computation = async {
-                  let! next = enumerator.MoveNext ()
-                  return
-                    match next with
-                    | Some value ->
-                      current := value
-                      true
-                    | _ ->
-                      current := Unchecked.defaultof<_>
-                      false }
-                Async.StartAsTask (computation, cancellationToken = cancellationToken)
-              member __.Dispose () =
-                current := Unchecked.defaultof<_>
-                enumerator.Dispose ()
-          }
-    }

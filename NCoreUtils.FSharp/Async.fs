@@ -6,15 +6,21 @@ open System.Threading
 open System.Threading.Tasks
 
 [<AutoOpen>]
-module private Helpers =
+module Helpers =
 
-  let inline private flatten (exn : AggregateException) =
+  let inline flatten (exn : AggregateException) =
     let flatExn = exn.Flatten ()
     match flatExn.InnerExceptions.Count with
     | 1 -> flatExn.InnerExceptions.[0]
     | _ -> flatExn :> _
 
-  let inline (|VCancelled|VFailed|VSuccess|) (task : Task<'a>) =
+  [<Struct>]
+  type TaskResult<'T> =
+    | VCancelled
+    | VSuccess of Result:'T
+    | VFailed  of Exception:exn
+
+  let inline getTaskState (task : Task<'a>) =
     match task.IsFaulted with
     | true -> VFailed (flatten task.Exception)
     | _ ->
@@ -33,7 +39,8 @@ module private Helpers =
   let inline invokeWithContinuations (invocation : CancellationToken -> Task<_>) cancellationToken (success : _ -> unit, error : exn -> unit, cancel : OperationCanceledException -> unit) =
     let continuation =
       System.Action<Task<_>>
-        (function
+        (fun task ->
+          match getTaskState task with
           | VSuccess result -> success result
           | VFailed  exn    -> error exn
           | VCancelled      -> cancel (OperationCanceledException ()))

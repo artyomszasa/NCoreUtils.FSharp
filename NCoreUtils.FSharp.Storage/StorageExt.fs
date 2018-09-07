@@ -1,21 +1,21 @@
 [<AutoOpen>]
 module NCoreUtils.StorageExt
 
-open NCoreUtils.Storage
-open System.Runtime.InteropServices
-open FSharp.Control
 open System.IO
-open NCoreUtils.Progress
+open System.Runtime.InteropServices
 open System.Threading
+open FSharp.Control
+open NCoreUtils.Storage
+open NCoreUtils.Progress
 
 type IStorageProvider with
-  member this.AsyncGetRoots () = this.GetRootsAsync () |> AsyncSeq.ofAsyncEnumerable
+  member this.AsyncGetRoots () = this.GetRootsAsync () |> ofAsyncEnumerable
   member this.AsyncTryResolve uri = async {
     let! path = Async.Adapt (fun cancellationToken -> this.ResolveAsync (uri, cancellationToken))
     return Option.wrap path }
 
 type IStorageContainer with
-  member this.AsyncGetContents () = this.GetContentsAsync () |> AsyncSeq.ofAsyncEnumerable
+  member this.AsyncGetContents () = this.GetContentsAsync () |> ofAsyncEnumerable
   member this.AsyncCreateRecord (name, contents : Stream, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
     Async.Adapt (fun cancellationToken -> this.CreateRecordAsync (name, contents, progress, cancellationToken))
   member this.AsyncCreateRecord (name, contents : byte[], [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
