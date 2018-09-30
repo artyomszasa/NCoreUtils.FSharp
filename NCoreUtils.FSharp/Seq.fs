@@ -91,3 +91,74 @@ module Seq =
     match found with
     | true -> Some value
     | _    -> None
+
+  [<CompiledName("TryMinAsValue")>]
+  let tryMinValue (seq : seq<_>) =
+    use enumerator = seq.GetEnumerator ()
+    let mutable found = false
+    let mutable value = Unchecked.defaultof<_>
+    while enumerator.MoveNext () do
+      let current = enumerator.Current
+      match not found || value > current with
+      | true ->
+        value <- current
+        found <- true
+      | _ -> ()
+    match found with
+    | true -> ValueSome value
+    | _    -> ValueNone
+
+  [<CompiledName("TryMinAsValueBy")>]
+  let tryMinValueBy selector (seq : seq<_>) =
+    use enumerator = seq.GetEnumerator ()
+    let mutable found = false
+    let mutable key = Unchecked.defaultof<_>
+    let mutable value = Unchecked.defaultof<_>
+    while enumerator.MoveNext () do
+      let current = enumerator.Current
+      let currentKey = selector current
+      match not found || key > currentKey with
+      | true ->
+        value <- current
+        key   <- currentKey
+        found <- true
+      | _ -> ()
+    match found with
+    | true -> ValueSome value
+    | _    -> ValueNone
+
+  [<CompiledName("TryMaxAsValue")>]
+  let tryMaxValue (seq : seq<_>) =
+    use enumerator = seq.GetEnumerator ()
+    let mutable found = false
+    let mutable value = Unchecked.defaultof<_>
+    while enumerator.MoveNext () do
+      let current = enumerator.Current
+      match not found || value < current with
+      | true ->
+        value <- current
+        found <- true
+      | _ -> ()
+    match found with
+    | true -> ValueSome value
+    | _    -> ValueNone
+
+  [<CompiledName("TryMaxAsValueBy")>]
+  let tryMaxValueBy selector (seq : seq<_>) =
+    use enumerator = seq.GetEnumerator ()
+    let mutable found = false
+    let mutable key = Unchecked.defaultof<_>
+    let mutable value = Unchecked.defaultof<_>
+    while enumerator.MoveNext () do
+      let current = enumerator.Current
+      let currentKey = selector current
+      match not found || key < currentKey with
+      | true ->
+        value <- current
+        key   <- currentKey
+        found <- true
+      | _ -> ()
+    match found with
+    | true -> ValueSome value
+    | _    -> ValueNone
+

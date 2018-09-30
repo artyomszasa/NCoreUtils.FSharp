@@ -27,6 +27,12 @@ let ``min/max`` () =
   Assert.Equal (Some 1, Seq.tryMin rand)
   Assert.Equal (Some 30, Seq.tryMax input)
   Assert.Equal (Some 30, Seq.tryMax rand)
+  Assert.Equal (ValueNone, Seq.tryMinValue [])
+  Assert.Equal (ValueNone, Seq.tryMaxValue [])
+  Assert.Equal (ValueSome 1, Seq.tryMinValue input)
+  Assert.Equal (ValueSome 1, Seq.tryMinValue rand)
+  Assert.Equal (ValueSome 30, Seq.tryMaxValue input)
+  Assert.Equal (ValueSome 30, Seq.tryMaxValue rand)
 
 [<Fact>]
 let ``min/max with selector`` () =
@@ -39,3 +45,9 @@ let ``min/max with selector`` () =
   Assert.Equal (Some (ref 1), Seq.tryMinBy selector rand)
   Assert.Equal (Some (ref 30), Seq.tryMaxBy selector input)
   Assert.Equal (Some (ref 30), Seq.tryMaxBy selector rand)
+  Assert.Equal (ValueNone, Seq.tryMinValueBy selector [])
+  Assert.Equal (ValueNone, Seq.tryMaxValueBy selector [])
+  Assert.Equal (ValueSome (ref 1), Seq.tryMinValueBy selector input)
+  Assert.Equal (ValueSome (ref 1), Seq.tryMinValueBy selector rand)
+  Assert.Equal (ValueSome (ref 30), Seq.tryMaxValueBy selector input)
+  Assert.Equal (ValueSome (ref 30), Seq.tryMaxValueBy selector rand)

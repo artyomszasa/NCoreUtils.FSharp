@@ -16,10 +16,10 @@ type IStorageProvider with
 
 type IStorageContainer with
   member this.AsyncGetContents () = this.GetContentsAsync () |> ofAsyncEnumerable
-  member this.AsyncCreateRecord (name, contents : Stream, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
-    Async.Adapt (fun cancellationToken -> this.CreateRecordAsync (name, contents, progress, cancellationToken))
-  member this.AsyncCreateRecord (name, contents : byte[], [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
-    Async.Adapt (fun cancellationToken -> this.CreateRecordAsync (name, contents, progress, cancellationToken))
+  member this.AsyncCreateRecord (name, contents : Stream, [<Optional; DefaultParameterValue(null : string)>] contentType, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
+    Async.Adapt (fun cancellationToken -> this.CreateRecordAsync (name, contents, contentType, progress, cancellationToken))
+  member this.AsyncCreateRecord (name, contents : byte[], [<Optional; DefaultParameterValue(null : string)>] contentType, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
+    Async.Adapt (fun cancellationToken -> this.CreateRecordAsync (name, contents, contentType, progress, cancellationToken))
   member this.AsyncCreateFolder (name, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
     Async.Adapt (fun cancellationToken -> this.CreateFolderAsync (name, progress, cancellationToken))
 
@@ -35,8 +35,8 @@ type IStorageRecord with
   member this.AsyncCreateReadableStream () =
     let inline f (cancellationToken : CancellationToken) = this.CreateReadableStreamAsync cancellationToken
     Async.Adapt f
-  member this.AsyncUpdateContent (contents, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
-    let inline f (cancellationToken : CancellationToken) = this.UpdateContentAsync (contents, progress, cancellationToken)
+  member this.AsyncUpdateContent (contents, [<Optional; DefaultParameterValue(null : string)>] contentType, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
+    let inline f (cancellationToken : CancellationToken) = this.UpdateContentAsync (contents, contentType, progress, cancellationToken)
     Async.Adapt f
   member this.AsyncRename (name, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
     let inline f (cancellationToken : CancellationToken) = this.RenameAsync (name, progress, cancellationToken)
