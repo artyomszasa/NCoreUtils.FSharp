@@ -129,6 +129,8 @@ module NullableTopLevelExtra =
   type ToNullable () =
     static member Convert (_ : ToNullable, o : 'a option) = match o with | Some x -> Nullable x | _ -> Nullable ()
 
+    static member Convert (_ : ToNullable, o : 'a voption) = match o with | ValueSome x -> Nullable x | _ -> Nullable ()
+
     static member Convert (_ : ToNullable, i : int) = Nullable i
 
     static member Convert (_ : ToNullable, d : decimal) = Nullable d

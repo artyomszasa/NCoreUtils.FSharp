@@ -17,10 +17,22 @@ module Common =
     static member SupplyValue (_ : ValueSupply, v : 'a, o : 'a voption) = match o with | ValueNone -> v | ValueSome v -> v
     static member SupplyValue (_ : ValueSupply, v : 'a, o : Nullable<'a>) = if o.HasValue then o.Value else v
 
+  [<Sealed>]
+  type OrElse =
+    static member Supply (_ : OrElse, v : unit -> 'a option, o : 'a option) = match o with | None -> v () | Some _ as v -> v
+    static member Supply (_ : OrElse, v : unit -> 'a voption, o : 'a voption) = match o with | ValueNone -> v () | ValueSome _ as v -> v
+    static member Supply (_ : OrElse, v : unit -> Nullable<'a>, o : Nullable<'a>) = if o.HasValue then o else v ()
+
+
   let inline (|?) (optional : ^b) (value : ^a) : ^a
     when ^x :> ValueSupply
     and  (^a or ^x) : (static member SupplyValue : ^x * ^a * ^b -> ^a)
     = ((^a or ^x) : (static member SupplyValue : ^x * ^a * ^b -> ^a) (Unchecked.defaultof<ValueSupply>, value, optional))
+
+  let inline (|?=) (optional : ^b) (value : ^a) : ^b
+    when ^x :> OrElse
+    and  (^a or ^x) : (static member Supply : ^x * ^a * ^b -> ^b)
+    = ((^a or ^x) : (static member Supply : ^x * ^a * ^b -> ^b) (Unchecked.defaultof<OrElse>, value, optional))
 
   let inline (|??) (nullValue : 'a) (defaultValue : 'a) : 'a when 'a : null = if isNull nullValue then defaultValue else nullValue
 

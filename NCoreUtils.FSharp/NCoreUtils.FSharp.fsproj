@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <Version>2.0.1-alpha0</Version>
+    <Version>2.0.2</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.FSharp</PackageId>
     <Title>$(PackageId)</Title>
@@ -9,7 +9,7 @@
     <Description>F# friendly extensions for .NET.</Description>
     <Copyright>Artyom Antyipin</Copyright>
     <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.FSharp.git</RepositoryUrl>
-    <PackageReleaseNotes>F# 4.5 support.</PackageReleaseNotes>
+    <PackageReleaseNotes>New Seq, Array, ValueOption extensions, generalizing .</PackageReleaseNotes>
     <!-- Assembly Info -->
     <Product>NCoreUtils</Product>
     <AssemblyName>$(PackageId)</AssemblyName>
@@ -19,6 +19,7 @@
     <DebugType>portable</DebugType>
     <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile> -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>2003</NoWarn>
   </PropertyGroup>
   <!-- mono fix -->
   <PropertyGroup>
@@ -30,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Common.fs" />
+    <Compile Include="ValueOption.fs" />
     <Compile Include="Array.fs" />
     <Compile Include="Option.fs" />
     <Compile Include="Nullable.fs" />

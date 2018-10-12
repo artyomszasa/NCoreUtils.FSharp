@@ -1,14 +1,19 @@
 namespace NCoreUtils
 
+open System
+open System.Runtime.CompilerServices
+
 [<RequireQualifiedAccess>]
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Option =
 
+  [<Obsolete("Use Option.ofObj instead")>]
   let inline wrap (x : 'a when 'a : not struct) =
     match box x with
     | null -> None
     | _    -> Some x
 
+  [<Obsolete("Use Option.toObj instead")>]
   let inline unwrap (x : 'a option when 'a : null) =
     match x with
     | Some x -> x
@@ -34,15 +39,7 @@ module Option =
     | None -> supply ()
     | _    -> o
 
-[<AutoOpen>]
+[<Obsolete("Use generalized version instead")>]
 module OptionTopLevelOperators =
 
   let (|?=) option supply = Option.trySupply supply option
-
-[<AutoOpen>]
-module ValueOptionTopLevelOperators =
-
-  let (|?=) option supply =
-    match option with
-    | ValueSome _ -> option
-    | _           -> supply ()

@@ -323,4 +323,4 @@ type Q private () =
   [<CompiledName("AsyncTryGetFirst")>]
   static member asyncTryFirst (query : IQueryable<_>) = async {
     let! value = Async.Adapt query.FirstOrDefaultAsync
-    return Option.wrap value }
+    return Option.ofObj value }
