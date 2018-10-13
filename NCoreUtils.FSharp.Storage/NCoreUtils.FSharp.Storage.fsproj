@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>2.0.2-beta0</Version>
+    <Version>2.0.2-beta1</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.FSharp.Storage</PackageId>
     <Title>$(PackageId)</Title>
@@ -29,6 +29,6 @@
     <ProjectReference Include="..\NCoreUtils.FSharp.Interop\NCoreUtils.FSharp.Interop.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NCoreUtils.Storage.Abstractions" Version="2.0.0-beta0" />
+    <PackageReference Include="NCoreUtils.Storage.Abstractions" Version="2.0.0-beta1" />
   </ItemGroup>
 </Project>

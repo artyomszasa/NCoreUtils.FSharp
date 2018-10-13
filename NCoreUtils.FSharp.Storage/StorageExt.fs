@@ -16,7 +16,10 @@ type IStorageProvider with
     let! path = Async.Adapt (fun cancellationToken -> this.ResolveAsync (uri, cancellationToken))
     return Option.ofObj path }
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
-  member this.AsyncCreateRecord (path, contents, [<Optional; DefaultParameterValue(null : string)>] contentType, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
+  member this.AsyncCreateRecord (path, contents : Stream, [<Optional; DefaultParameterValue(null : string)>] contentType, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
+    Async.Adapt (fun cancellationToken -> this.CreateRecordAsync (path, contents, contentType, progress, cancellationToken))
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  member this.AsyncCreateRecord (path, contents : byte[], [<Optional; DefaultParameterValue(null : string)>] contentType, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
     Async.Adapt (fun cancellationToken -> this.CreateRecordAsync (path, contents, contentType, progress, cancellationToken))
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   member this.AsyncCreateFolder (path, [<Optional; DefaultParameterValue(false : bool)>] recursive, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
