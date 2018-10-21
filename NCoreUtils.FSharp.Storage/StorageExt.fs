@@ -25,6 +25,10 @@ type IStorageProvider with
   member this.AsyncCreateFolder (path, [<Optional; DefaultParameterValue(false : bool)>] recursive, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
     Async.Adapt (fun cancellationToken -> this.CreateFolderAsync (path, recursive, progress, cancellationToken))
 
+type IStoragePath with
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  member this.AsyncGetParent () = Async.Adapt (fun cancellationToken -> this.GetParentAsync cancellationToken)
+
 type IStorageContainer with
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   member this.AsyncGetContents () = this.GetContentsAsync () |> ofAsyncEnumerable
@@ -68,3 +72,6 @@ type IStorageRecord with
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   member this.AsyncCopyTo (destination, ?bufferSize, ?progress) =
     Async.Adapt (fun cancellationToken -> this.CopyToAsync (destination, Option.toNullable bufferSize, defaultArg progress null, cancellationToken))
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  member this.AsyncUpdateSecurity (security, [<Optional; DefaultParameterValue(null : IProgress)>] progress) =
+    Async.Adapt (fun cancellationToken -> this.UpdateSecurityAsync (security, progress, cancellationToken))
