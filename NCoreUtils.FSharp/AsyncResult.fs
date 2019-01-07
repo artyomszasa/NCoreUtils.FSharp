@@ -22,7 +22,6 @@ type AsyncResult<'TError> internal (isSuccess : bool, err : 'TError) =
     | true -> onSuccess.Invoke ()
     | _    -> onError.Invoke err
 
-// FIXME: move to NCoreUtils.FSharp
 [<Serializable>]
 type AsyncResult<'T, 'TError> internal (isSuccess : bool, value : 'T, err : 'TError) =
   member val IsSuccess = isSuccess
@@ -52,6 +51,12 @@ type AsyncResult<'T, 'TError> internal (isSuccess : bool, value : 'T, err : 'TEr
     match isSuccess with
     | true -> onSuccess.Invoke value
     | _    -> onError.Invoke err
+  /// <summary>
+  /// Invokes the callback appliable to the actual state of the instance.
+  /// </summary>
+  /// <param name="onSuccess">Invokes if the actual instance represents result of the successfull operation.</param>
+  /// <param name="onError">Invokes if the actual instance represents result of the failed operation.</param>
+  /// <returns>Result of the callback operation.</returns>
   member __.Match<'TResult> (onSuccess : Func<'T, 'TResult>, onError : Func<'TError, 'TResult>) =
     match isSuccess with
     | true -> onSuccess.Invoke value

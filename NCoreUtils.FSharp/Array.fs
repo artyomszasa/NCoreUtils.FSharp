@@ -24,6 +24,11 @@ module Array =
     for i = 0 to l - 1 do
       swap i (l - i) array
 
+  /// <summary>
+  /// Finds minimum element of the specified array returning <c>None</c> if the array was empty.
+  /// </summary>
+  /// <param name="array">Source array.</param>
+  /// <returns>Either boxed minimum element or <c>None</c>.</returns>
   [<CompiledName("TryMin")>]
   let tryMin (array : _[]) =
     match array.Length with
@@ -36,6 +41,13 @@ module Array =
           result <- array.[i]
       Some result
 
+  /// <summary>
+  /// Finds minimum element of the specified array by applying key selector to the elements of the array and comparing
+  /// key values, returning <c>None</c> if the array was empty.
+  /// </summary>
+  /// <param name="keySelector">Key selector.</param>
+  /// <param name="array">Source array.</param>
+  /// <returns>Either boxed minimum element or <c>None</c>.</returns>
   [<CompiledName("TryMinBy")>]
   let tryMinBy keySelector (array : _[]) =
     match array.Length with
