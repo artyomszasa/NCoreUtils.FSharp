@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>2.0.2</Version>
+    <Version>2.0.3-alpha0</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.FSharp.DependencyInjection</PackageId>
     <Title>$(PackageId)</Title>
@@ -9,7 +9,7 @@
     <Description>F# friendly extensions for .NET Core dependency injection.</Description>
     <Copyright>Artyom Antyipin</Copyright>
     <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.FSharp.git</RepositoryUrl>
-    <PackageReleaseNotes>Follow dependency changes.</PackageReleaseNotes>
+    <PackageReleaseNotes>Bump dependencies to .NET Core 2.2.</PackageReleaseNotes>
     <!-- Assembly Info -->
     <Product>NCoreUtils</Product>
     <AssemblyName>$(PackageId)</AssemblyName>
@@ -19,6 +19,7 @@
     <DebugType>portable</DebugType>
     <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile> -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>2003</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
@@ -28,7 +29,7 @@
     <Compile Include="ServiceInstance.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
     <PackageReference Include="NCoreUtils.CaseInsensitive" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
