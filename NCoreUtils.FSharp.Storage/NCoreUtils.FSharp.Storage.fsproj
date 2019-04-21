@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>2.0.2</Version>
+    <Version>2.1.0-alpha0</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.FSharp.Storage</PackageId>
     <Title>$(PackageId)</Title>
@@ -10,7 +10,7 @@
     <Description>F# friendly extensions for NCoreUtils.Storage.</Description>
     <Copyright>Artyom Antyipin</Copyright>
     <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.FSharp.git</RepositoryUrl>
-    <PackageReleaseNotes>Switch to newer version of NCoreUtils.Storage.</PackageReleaseNotes>
+    <PackageReleaseNotes>Target F# 4.6.</PackageReleaseNotes>
     <!-- Assembly Info -->
     <Product>NCoreUtils</Product>
     <AssemblyName>$(PackageId)</AssemblyName>
@@ -29,6 +29,6 @@
     <ProjectReference Include="..\NCoreUtils.FSharp.Interop\NCoreUtils.FSharp.Interop.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NCoreUtils.Storage.Abstractions" Version="2.0.0" />
+    <PackageReference Include="NCoreUtils.Storage.Abstractions" Version="2.0.1-beta2" />
   </ItemGroup>
 </Project>

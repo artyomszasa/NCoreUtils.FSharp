@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.FSharp\NCoreUtils.FSharp.fsproj" />
+    <ProjectReference Include="..\NCoreUtils.FSharp.Synchronization\NCoreUtils.FSharp.Synchronization.fsproj" />
   </ItemGroup>
 
 </Project>

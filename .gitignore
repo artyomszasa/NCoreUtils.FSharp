@@ -2,3 +2,5 @@
 .vs
 NCoreUtils*/bin
 NCoreUtils*/obj
+NCoreUtils.FSharp.Synchronization.Unit/coverage.opencover.xml
+NCoreUtils.FSharp.Synchronization.Unit/report

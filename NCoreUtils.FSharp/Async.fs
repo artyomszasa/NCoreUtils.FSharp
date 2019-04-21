@@ -43,8 +43,12 @@ module Helpers =
           match getTaskState task with
           | VSuccess result -> success result
           | VFailed  exn    -> error exn
-          | VCancelled      -> cancel (OperationCanceledException ()))
-    (invocation cancellationToken).ContinueWith (continuation, TaskContinuationOptions.ExecuteSynchronously) |> ignore
+          | VCancelled      -> cancel (TaskCanceledException ()))
+    (invocation cancellationToken).ContinueWith (
+      continuation,
+      CancellationToken.None,
+      TaskContinuationOptions.None,
+      TaskScheduler.Default) |> ignore
 
   let inline invokeVoidWithContinuations (invocation : CancellationToken -> Task) cancellationToken (success : _ -> unit, error : exn -> unit, cancel : OperationCanceledException -> unit) =
     let continuation =
@@ -52,8 +56,12 @@ module Helpers =
         (function
           | Success result -> success result
           | Failed  exn    -> error exn
-          | Cancelled      -> cancel (OperationCanceledException ()))
-    (invocation cancellationToken).ContinueWith (continuation, TaskContinuationOptions.ExecuteSynchronously) |> ignore
+          | Cancelled      -> cancel (TaskCanceledException ()))
+    (invocation cancellationToken).ContinueWith (
+      continuation,
+      CancellationToken.None,
+      TaskContinuationOptions.None,
+      TaskScheduler.Default) |> ignore
 
 
 type Microsoft.FSharp.Control.Async with
