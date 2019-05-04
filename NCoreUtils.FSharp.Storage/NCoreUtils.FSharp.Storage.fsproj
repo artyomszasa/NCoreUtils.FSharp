@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>2.1.0-alpha0</Version>
+    <Version>2.1.0</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.FSharp.Storage</PackageId>
     <Title>$(PackageId)</Title>
@@ -29,6 +28,7 @@
     <ProjectReference Include="..\NCoreUtils.FSharp.Interop\NCoreUtils.FSharp.Interop.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NCoreUtils.Storage.Abstractions" Version="2.0.1-beta2" />
+    <PackageReference Update="FSharp.Core" Version="4.6.2" />
+    <PackageReference Include="NCoreUtils.Storage.Abstractions" Version="2.0.1" />
   </ItemGroup>
 </Project>

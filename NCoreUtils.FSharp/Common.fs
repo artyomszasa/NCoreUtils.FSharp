@@ -351,3 +351,8 @@ module Common =
       | :? AggregateException as ae -> ae.InnerExceptions |> tryPickValue impl
       | _                           -> ValueNone
     impl exn
+
+  // functional
+  [<CompiledName("Invoke")>]
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  let invoke f = f ()

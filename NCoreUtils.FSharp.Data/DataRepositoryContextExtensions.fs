@@ -6,7 +6,8 @@ open System.Runtime.CompilerServices
 
 type IDataRepositoryContext with
 
-  member inline this.AsyncBeginTransaction isolationLevel =
+  [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+  member this.AsyncBeginTransaction isolationLevel =
     Async.Adapt (fun cancellationToken -> this.BeginTransactionAsync (isolationLevel, cancellationToken))
 
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]

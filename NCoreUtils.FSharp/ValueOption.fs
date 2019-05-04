@@ -5,182 +5,133 @@ open System.Runtime.CompilerServices
 
 [<RequireQualifiedAccess>]
 [<CompiledName("NCoreUtilsValueOptionModule")>]
+[<Obsolete("Since 4.6.x ValueOption functions are implemented in FSharp.Core.")>]
 module ValueOption =
 
   [<CompiledName("Bind")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let bind binder voption =
-    match voption with
-    | ValueSome v -> binder v
-    | _           -> ValueNone
+    Microsoft.FSharp.Core.ValueOption.bind binder voption
 
   [<CompiledName("Contains")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let contains value voption =
-    match voption with
-    | ValueSome v -> v = value
-    | _           -> false
+    Microsoft.FSharp.Core.ValueOption.contains value voption
 
   [<CompiledName("Count")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let count voption =
-    match voption with
-    | ValueSome _ -> 1
-    | _           -> 0
+    Microsoft.FSharp.Core.ValueOption.count voption
 
   [<CompiledName("DefaultValue")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let defaultValue ``default`` voption =
-    match voption with
-    | ValueSome v -> v
-    | _           -> ``default``
+    Microsoft.FSharp.Core.ValueOption.defaultValue ``default`` voption
 
   [<CompiledName("DefaultWith")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let defaultWith defThunk voption =
-    match voption with
-    | ValueSome v -> v
-    | _           -> defThunk ()
+    Microsoft.FSharp.Core.ValueOption.defaultWith defThunk voption
 
   [<CompiledName("Exists")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let exists predicate voption =
-    match voption with
-    | ValueSome v -> predicate v
-    | _           -> false
+    Microsoft.FSharp.Core.ValueOption.exists predicate voption
 
   [<CompiledName("Filter")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let filter predicate voption =
-    match voption with
-    | ValueSome v as result when predicate v -> result
-    | _                                      -> ValueNone
+    Microsoft.FSharp.Core.ValueOption.filter predicate voption
 
   [<CompiledName("Flatten")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let flatten voption =
-    match voption with
-    | ValueSome x -> x
-    | _           -> ValueNone
+    Microsoft.FSharp.Core.ValueOption.flatten voption
 
   [<CompiledName("Fold")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let fold folder state voption =
-    match voption with
-    | ValueSome v -> folder state v
-    | _           -> state
+    Microsoft.FSharp.Core.ValueOption.fold folder state voption
 
   [<CompiledName("FoldBack")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let foldBack folder voption state =
-    match voption with
-    | ValueSome v -> folder v state
-    | _           -> state
+    Microsoft.FSharp.Core.ValueOption.foldBack folder voption state
 
   [<CompiledName("ForAll")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let forall predicate voption =
-    match voption with
-    | ValueSome v -> predicate v
-    | _           -> true
+    Microsoft.FSharp.Core.ValueOption.forall predicate voption
 
   [<CompiledName("GetValue")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let get voption =
-    match voption with
-    | ValueSome v -> v
-    | _           -> ArgumentException ("Empty value", "voption") |> raise
+    Microsoft.FSharp.Core.ValueOption.get voption
 
   [<CompiledName("IsNone")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let isNone voption =
-    match voption with
-    | ValueSome _ -> false
-    | _           -> true
+    Microsoft.FSharp.Core.ValueOption.isNone voption
 
   [<CompiledName("IsSome")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let isSome voption =
-    match voption with
-    | ValueSome _ -> true
-    | _           -> false
+    Microsoft.FSharp.Core.ValueOption.isSome voption
 
   [<CompiledName("Iterate")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let iter action voption =
-    match voption with
-    | ValueSome v -> action v
-    | _           -> ()
+    Microsoft.FSharp.Core.ValueOption.iter action voption
 
   [<CompiledName("Map")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let map mapping voption =
-    match voption with
-    | ValueSome v -> ValueSome <| mapping v
-    | _           -> ValueNone
+    Microsoft.FSharp.Core.ValueOption.map mapping voption
 
   [<CompiledName("Map2")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let map2 mapping voption1 voption2 =
-    match voption1, voption2 with
-    | ValueSome v1, ValueSome v2 -> ValueSome <| mapping v1 v2
-    | _                          -> ValueNone
+    Microsoft.FSharp.Core.ValueOption.map2 mapping voption1 voption2
 
   [<CompiledName("OfNullable")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let ofNullable (nullable : Nullable<_>) =
-    match nullable.HasValue with
-    | true -> ValueSome nullable.Value
-    | _    -> ValueNone
+    Microsoft.FSharp.Core.ValueOption.ofNullable nullable
 
   [<CompiledName("OfObj")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let ofObj obj =
-    match obj with
-    | null -> ValueNone
-    | _    -> ValueSome obj
+    Microsoft.FSharp.Core.ValueOption.ofObj obj
 
   [<CompiledName("OrElse")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let orElse ifNone voption =
-    match voption with
-    | ValueSome _ as result -> result
-    | _                     -> ifNone
+    Microsoft.FSharp.Core.ValueOption.orElse ifNone voption
 
   [<CompiledName("OrElseWith")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let orElseWith ifNoneThunk voption =
-    match voption with
-    | ValueSome _ as result -> result
-    | _                     -> ifNoneThunk ()
+    Microsoft.FSharp.Core.ValueOption.orElseWith ifNoneThunk voption
 
   [<CompiledName("ToArray")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let toArray voption =
-    match voption with
-    | ValueSome v -> [| v |]
-    | _           -> [|   |]
+    Microsoft.FSharp.Core.ValueOption.toArray voption
 
   [<CompiledName("ToList")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let toList voption =
-    match voption with
-    | ValueSome v -> [ v ]
-    | _           -> [   ]
+    Microsoft.FSharp.Core.ValueOption.toList voption
 
   [<CompiledName("ToNullable")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let toNullable voption =
-    match voption with
-    | ValueSome v -> Nullable v
-    | _           -> Nullable ()
+    Microsoft.FSharp.Core.ValueOption.toNullable voption
 
   [<CompiledName("ToObj")>]
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   let toObj voption =
-    match voption with
-    | ValueSome v -> v
-    | _           -> null
+    Microsoft.FSharp.Core.ValueOption.toObj voption
 
 [<AutoOpen>]
 module ValueOptionTopLevelOperators =
