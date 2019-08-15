@@ -292,18 +292,32 @@ type Q private () =
 
   [<CompiledName("ToAsyncSequence")>]
   static member toAsyncSeq (query : IQueryable<_>) =
-    let enumerator = query.ExecuteAsync().GetEnumerator ()
-    AsyncSeq.unfoldAsync
-      (fun (enumerator : IAsyncEnumerator<_>) -> async {
-        let! hasNext = Async.Adapt enumerator.MoveNext
-        return
-          match hasNext with
-          | true -> Some (enumerator.Current, enumerator)
-          | _ ->
-            enumerator.Dispose ()
-            None
-      })
-      enumerator
+    // let enumerator = query.ExecuteAsync().GetAsyncEnumerator ()
+    // AsyncSeq.unfoldAsync
+    //   (fun (enumerator : IAsyncEnumerator<_>) -> async {
+    //     let! hasNext = Async.Adapt enumerator.MoveNext
+    //     return
+    //       match hasNext with
+    //       | true -> Some (enumerator.Current, enumerator)
+    //       | _ ->
+    //         enumerator.Dispose ()
+    //         None
+    //   })
+    //   enumerator
+    { new FSharp.Control.IAsyncEnumerable<_> with
+        member __.GetEnumerator () =
+          // FIMXE: cancellation
+          let enumerator = query.ExecuteAsync(System.Threading.CancellationToken.None).GetAsyncEnumerator ()
+          { new FSharp.Control.IAsyncEnumerator<_> with
+              member __.MoveNext () = async {
+                let! hasNext = Async.VAdapt (fun _ -> enumerator.MoveNextAsync ())
+                return
+                  match hasNext with
+                  | true -> Some enumerator.Current
+                  | _    -> None }
+              member __.Dispose () = enumerator.DisposeAsync().AsTask().Wait()
+          }
+    }
 
   [<CompiledName("AsyncExists")>]
   static member asyncExists ([<ReflectedDefinition>] predicate) =

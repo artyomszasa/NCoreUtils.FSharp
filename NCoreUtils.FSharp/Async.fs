@@ -38,7 +38,7 @@ module Helpers =
 
   let inline invokeWithContinuations (invocation : CancellationToken -> Task<_>) cancellationToken (success : _ -> unit, error : exn -> unit, cancel : OperationCanceledException -> unit) =
     let continuation =
-      System.Action<Task<_>>
+      Action<Task<_>>
         (fun task ->
           match getTaskState task with
           | VSuccess result -> success result
@@ -52,7 +52,7 @@ module Helpers =
 
   let inline invokeVoidWithContinuations (invocation : CancellationToken -> Task) cancellationToken (success : _ -> unit, error : exn -> unit, cancel : OperationCanceledException -> unit) =
     let continuation =
-      System.Action<Task>
+      Action<Task>
         (function
           | Success result -> success result
           | Failed  exn    -> error exn
@@ -62,6 +62,43 @@ module Helpers =
       CancellationToken.None,
       TaskContinuationOptions.None,
       TaskScheduler.Default) |> ignore
+
+  let inline vinvokeWithContinuations (invocation : CancellationToken -> ValueTask<_>) cancellationToken (success : _ -> unit, error : exn -> unit, cancel : OperationCanceledException -> unit) =
+    match invocation cancellationToken with
+    | vt when vt.IsCompleted ->
+      try success vt.Result
+      with exn -> error exn
+    | vt ->
+      let continuation =
+        Action<Task<_>>
+          (fun task ->
+            match getTaskState task with
+            | VSuccess result -> success result
+            | VFailed  exn    -> error exn
+            | VCancelled      -> cancel (TaskCanceledException ()))
+      vt.AsTask().ContinueWith (
+        continuation,
+        CancellationToken.None,
+        TaskContinuationOptions.None,
+        TaskScheduler.Default) |> ignore
+
+  let inline vinvokeVoidWithContinuations (invocation : CancellationToken -> ValueTask) cancellationToken (success : _ -> unit, error : exn -> unit, cancel : OperationCanceledException -> unit) =
+    match invocation cancellationToken with
+    | vt when vt.IsCompleted ->
+      try success (vt.GetAwaiter().GetResult())
+      with exn -> error exn
+    | vt ->
+      let continuation =
+        Action<Task>
+          (function
+            | Success result -> success result
+            | Failed  exn    -> error exn
+            | Cancelled      -> cancel (TaskCanceledException ()))
+      vt.AsTask().ContinueWith (
+        continuation,
+        CancellationToken.None,
+        TaskContinuationOptions.None,
+        TaskScheduler.Default) |> ignore
 
 
 type Microsoft.FSharp.Control.Async with
@@ -76,6 +113,18 @@ type Microsoft.FSharp.Control.Async with
   static member inline Adapt (invocation : CancellationToken -> Task) =
     let inline start cancellationToken =
       Async.FromContinuations (invokeVoidWithContinuations invocation cancellationToken)
+    async.Bind (Async.CancellationToken, start)
+
+  /// Adapts TPL based asyncronous invokation.
+  static member inline VAdapt (invocation : CancellationToken -> ValueTask<_>) =
+    let inline start cancellationToken =
+      Async.FromContinuations (vinvokeWithContinuations invocation cancellationToken)
+    async.Bind (Async.CancellationToken, start)
+
+  /// Adapts TPL based asyncronous invokation.
+  static member inline VAdapt (invocation : CancellationToken -> ValueTask) =
+    let inline start cancellationToken =
+      Async.FromContinuations (vinvokeVoidWithContinuations invocation cancellationToken)
     async.Bind (Async.CancellationToken, start)
 
   static member inline Raise (e : #exn) = Async.FromContinuations (fun (_, error, _) -> error e)

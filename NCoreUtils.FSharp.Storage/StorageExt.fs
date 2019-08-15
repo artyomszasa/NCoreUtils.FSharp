@@ -9,6 +9,25 @@ open FSharp.Control
 open NCoreUtils.Storage
 open NCoreUtils.Progress
 
+// FIXME: Merge with NCoreUtils.FSharp.Interop
+[<AutoOpen>]
+module private Interop =
+
+  let ofAsyncEnumerable (source : System.Collections.Generic.IAsyncEnumerable<_>) =
+    { new IAsyncEnumerable<_> with
+        member __.GetEnumerator () =
+          let enumerator = source.GetAsyncEnumerator CancellationToken.None
+          { new IAsyncEnumerator<_> with
+              member __.MoveNext () = async {
+                let! hasNext = Async.VAdapt (fun _ -> enumerator.MoveNextAsync())
+                return
+                  match hasNext with
+                  | true -> Some enumerator.Current
+                  | _    -> None }
+              member __.Dispose () = enumerator.DisposeAsync().AsTask().Wait()
+          }
+    }
+
 type IStorageProvider with
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   member this.AsyncGetRoots () = this.GetRootsAsync () |> ofAsyncEnumerable
