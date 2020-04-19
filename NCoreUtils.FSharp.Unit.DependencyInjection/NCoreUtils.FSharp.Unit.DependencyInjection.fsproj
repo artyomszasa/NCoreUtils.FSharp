@@ -17,4 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.FSharp.DependencyInjection\NCoreUtils.FSharp.DependencyInjection.fsproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.7.0" />
+  </ItemGroup>
 </Project>

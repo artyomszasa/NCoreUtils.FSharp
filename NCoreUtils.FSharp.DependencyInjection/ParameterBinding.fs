@@ -3,12 +3,10 @@ namespace NCoreUtils
 open System
 open System.Reflection
 open Microsoft.FSharp.Reflection
-open NCoreUtils
 open System.ComponentModel
 open System.Runtime.CompilerServices
 open System.Collections.Generic
 open Microsoft.Extensions.DependencyInjection
-open System
 
 [<AttributeUsage(AttributeTargets.Class ||| AttributeTargets.Struct ||| AttributeTargets.Property, AllowMultiple = false)>]
 type ParameterNameAttribute (name : string) =
@@ -189,8 +187,8 @@ module ParameterBinding =
       match FSharpType.IsRecord (descriptor.Type, true) with
       | true ->
         FSharpType.GetRecordFields (descriptor.Type, true)
-        |> Array.map (ParameterDescriptor.ofProperty path >> asyncBindParameter serviceProvider tryGetParameters)
-        |> Async.Sequential
+        |>  Seq.map (ParameterDescriptor.ofProperty path >> asyncBindParameter serviceProvider tryGetParameters)
+        |>  Async.Sequential
         >>| mkRecord descriptor.Type
       | _ ->
         let binder =

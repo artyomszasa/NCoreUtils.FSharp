@@ -1,5 +1,6 @@
 namespace NCoreUtils
 
+open System
 open System.IO
 open System.Runtime.CompilerServices
 
@@ -10,6 +11,10 @@ module IOExtensions =
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     member this.AsyncCopyTo (destination : Stream, ?bufferSize : int) =
       Async.Adapt (fun cancellationToken -> this.CopyToAsync (destination, defaultArg bufferSize 8192, cancellationToken))
+
+    [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+    member this.AsyncRead (buffer: Memory<byte>) =
+      Async.VAdapt (fun cancellationToken -> this.ReadAsync (buffer, cancellationToken))
 
     member this.AsyncReadComplete (buffer, offset, count) =
       let rec readSome (read) = async {
@@ -24,6 +29,10 @@ module IOExtensions =
 
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     member this.AsyncFlush () = Async.Adapt this.FlushAsync
+
+    [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
+    member this.AsyncWrite (buffer: ReadOnlyMemory<byte>) =
+      Async.VAdapt (fun cancellationToken -> this.WriteAsync (buffer, cancellationToken))
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Stream =

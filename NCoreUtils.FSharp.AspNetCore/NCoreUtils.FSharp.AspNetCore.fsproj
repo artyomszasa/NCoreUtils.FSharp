@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <Version>3.0.0-preview8</Version>
+    <Version>3.0.0</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.FSharp.AspNetCore</PackageId>
     <Title>$(PackageId)</Title>
@@ -9,7 +9,6 @@
     <Description>F# friendly extensions for ASP.NET Core.</Description>
     <Copyright>Artyom Antyipin</Copyright>
     <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.FSharp.git</RepositoryUrl>
-    <PackageReleaseNotes>Target F# 4.6.</PackageReleaseNotes>
     <!-- Assembly Info -->
     <Product>NCoreUtils</Product>
     <AssemblyName>$(PackageId)</AssemblyName>
@@ -19,7 +18,7 @@
     <DebugType>portable</DebugType>
     <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile> -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>2003</NoWarn>
+    <NoWarn>2003;NU5105</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="InvalidRequestException.fs" />
@@ -36,9 +35,11 @@
     <ProjectReference Include="..\NCoreUtils.FSharp.DependencyInjection\NCoreUtils.FSharp.DependencyInjection.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.6.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="3.0.0-preview4-19123-01" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0-preview8.19405.4" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 </Project>

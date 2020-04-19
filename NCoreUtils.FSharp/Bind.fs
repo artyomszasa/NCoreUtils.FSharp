@@ -15,8 +15,11 @@ module BindTopLevelOperator =
       match o with
       | ValueSome x -> binder x
       | _           -> ValueNone
-    static member inline Bind (_ : BindMonad, n : Nullable<_>, binder) = Nullable.bind binder n
-    static member inline Bind (_ : BindMonad, a : Async<_>, binder) = async.Bind (a, binder)
+    static member inline Bind (_ : BindMonad, n : Nullable<_>, binder) =
+      Nullable.bind binder n
+    static member inline Bind (_ : BindMonad, a : Async<_>, binder) =
+      // AsyncPrimitives.MakeAsync (fun context -> AsyncPrimitives.Bind context a binder)
+      async.Bind (a, binder)
     static member inline Bind (_ : BindMonad, res : Result<_,_>, binder) =
       match res with
       | Ok    value -> binder value

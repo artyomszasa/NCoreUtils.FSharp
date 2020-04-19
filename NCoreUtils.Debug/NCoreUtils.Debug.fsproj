@@ -12,7 +12,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.FSharp\NCoreUtils.FSharp.fsproj" />
-    <ProjectReference Include="..\NCoreUtils.FSharp.Synchronization\NCoreUtils.FSharp.Synchronization.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.7.0" />
   </ItemGroup>
 
 </Project>

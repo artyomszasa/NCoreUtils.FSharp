@@ -20,6 +20,12 @@ module Helpers =
     | VSuccess of Result:'T
     | VFailed  of Exception:exn
 
+  [<Struct>]
+  type TaskResult =
+    | Cancelled
+    | Success
+    | Failed  of Exception:exn
+
   let inline getTaskState (task : Task<'a>) =
     match task.IsFaulted with
     | true -> VFailed (flatten task.Exception)
@@ -28,13 +34,21 @@ module Helpers =
     | true -> VCancelled
     | _    -> VSuccess task.Result
 
-  let inline (|Cancelled|Failed|Success|) (task : Task) =
+  let inline getUnitTaskState (task : Task) =
     match task.IsFaulted with
     | true -> Failed (flatten task.Exception)
     | _ ->
     match task.IsCanceled with
     | true -> Cancelled
     | _    -> Success
+
+  // let inline (|Cancelled|Failed|Success|) (task : Task) =
+  //   match task.IsFaulted with
+  //   | true -> Failed (flatten task.Exception)
+  //   | _ ->
+  //   match task.IsCanceled with
+  //   | true -> Cancelled
+  //   | _    -> Success
 
   let inline invokeWithContinuations (invocation : CancellationToken -> Task<_>) cancellationToken (success : _ -> unit, error : exn -> unit, cancel : OperationCanceledException -> unit) =
     let continuation =
@@ -53,10 +67,11 @@ module Helpers =
   let inline invokeVoidWithContinuations (invocation : CancellationToken -> Task) cancellationToken (success : _ -> unit, error : exn -> unit, cancel : OperationCanceledException -> unit) =
     let continuation =
       Action<Task>
-        (function
-          | Success result -> success result
-          | Failed  exn    -> error exn
-          | Cancelled      -> cancel (TaskCanceledException ()))
+        (fun task ->
+          match getUnitTaskState task with
+          | Success    -> success ()
+          | Failed exn -> error exn
+          | Cancelled  -> cancel (TaskCanceledException ()))
     (invocation cancellationToken).ContinueWith (
       continuation,
       CancellationToken.None,
@@ -90,16 +105,19 @@ module Helpers =
     | vt ->
       let continuation =
         Action<Task>
-          (function
-            | Success result -> success result
-            | Failed  exn    -> error exn
-            | Cancelled      -> cancel (TaskCanceledException ()))
+          (fun task ->
+            match getUnitTaskState task with
+            | Failed exn -> error exn
+            | Success    -> success ()
+            | Cancelled  -> cancel (TaskCanceledException ()))
       vt.AsTask().ContinueWith (
         continuation,
         CancellationToken.None,
         TaskContinuationOptions.None,
         TaskScheduler.Default) |> ignore
 
+
+let private fsharpAsyncSequential computations = Async.Sequential computations
 
 type Microsoft.FSharp.Control.Async with
 
@@ -129,10 +147,6 @@ type Microsoft.FSharp.Control.Async with
 
   static member inline Raise (e : #exn) = Async.FromContinuations (fun (_, error, _) -> error e)
 
-  static member Sequential (computations : Async<_>[]) = async {
-    let result = Array.zeroCreate<_> computations.Length
-    for i = 0 to (computations.Length - 1) do
-      let! item = computations.[i]
-      result.[i] <- item
-    return result }
+  [<Obsolete("Use FSharp.Core version instead.")>]
+  static member Sequential (computations : Async<_>[]) = fsharpAsyncSequential computations
 

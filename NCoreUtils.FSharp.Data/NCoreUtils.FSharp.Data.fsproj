@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <Version>3.0.0-preview8</Version>
+    <Version>3.0.0</Version>
     <!-- NuGet -->
     <PackageId>NCoreUtils.FSharp.Data</PackageId>
     <Title>$(PackageId)</Title>
@@ -9,7 +9,6 @@
     <Description>F# friendly extensions for data abstractions.</Description>
     <Copyright>Artyom Antyipin</Copyright>
     <RepositoryUrl>https://github.com/artyomszasa/NCoreUtils.FSharp.git</RepositoryUrl>
-    <PackageReleaseNotes>Target F# 4.6.</PackageReleaseNotes>
     <!-- Assembly Info -->
     <Product>NCoreUtils</Product>
     <AssemblyName>$(PackageId)</AssemblyName>
@@ -19,15 +18,15 @@
     <DebugType>portable</DebugType>
     <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile> -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>2003</NoWarn>
+    <NoWarn>2003;NU5105</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataRepositoryExtensions.fs" />
     <Compile Include="DataRepositoryContextExtensions.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.6.2" />
-    <PackageReference Include="NCoreUtils.Data.Abstractions" Version="3.0.0-preview8" />
+    <PackageReference Update="FSharp.Core" Version="4.7.0" />
+    <PackageReference Include="NCoreUtils.Data.Abstractions" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NCoreUtils.FSharp\NCoreUtils.FSharp.fsproj" />
