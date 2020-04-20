@@ -8,7 +8,7 @@ type IDataRepositoryContext with
 
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   member this.AsyncBeginTransaction isolationLevel =
-    Async.Adapt (fun cancellationToken -> this.BeginTransactionAsync (isolationLevel, cancellationToken))
+    Async.VAdapt (fun cancellationToken -> this.BeginTransactionAsync (isolationLevel, cancellationToken))
 
   [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
   member this.AsyncTransacted (isolationLevel, action) = async {

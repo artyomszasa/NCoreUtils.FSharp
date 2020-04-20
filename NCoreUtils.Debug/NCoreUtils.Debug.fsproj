@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>False</IsPackable>
   </PropertyGroup>
 
@@ -14,7 +14,7 @@
     <ProjectReference Include="..\NCoreUtils.FSharp\NCoreUtils.FSharp.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.0" />
+    <PackageReference Update="FSharp.Core" Version="4.7.1" />
   </ItemGroup>
 
 </Project>
